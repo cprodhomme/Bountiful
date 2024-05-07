@@ -431,8 +431,7 @@ object BountifulCommands {
                 source.world,
                 sourcePos,
                 BountifulContent.Decrees.toSet(),
-                rep,
-                it.world.time
+                rep
             )
             it.giveItemStack(stack)
         } catch (e: Exception) {

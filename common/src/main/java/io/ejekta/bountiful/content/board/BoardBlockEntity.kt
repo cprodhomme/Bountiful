@@ -320,8 +320,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
                 ourWorld,
                 pos,
                 usableDecrees,
-                levelData.first.coerceIn(-30..30),
-                ourWorld.time
+                levelData.first.coerceIn(-30..30)
             )
         }
 

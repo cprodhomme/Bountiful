@@ -2,12 +2,23 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as closely as it can.
+and this project loosely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [7.0.3] for 1.20.4 - Unreleased
+
+### Added
+- Added a %RANDOM_INT(1, 4)% preprocessor value for commands - this will be replaced with a number between 1 and 4, for example.
+
+### Changed
+- Players can no longer kill themselves with arrows or potions or anything else in order to fulfill `minecraft:player` entity objectives.
+
+### Fixed
+- Fixed a rare crash where a villager would forget where the bounty board is located.
+- TODO: Fix items being voided if the player closes their inventory with a stack attached to their cursor.
 
 ## [7.0.2] for 1.20.4 - 2024-03-04
 
 ### Fixed
-
 - Fixed a crash when playing with both Lithium and Bountiful and entering a game.
 
 ## [7.0.1] for 1.20.4 - 2024-02-28
@@ -70,6 +81,9 @@ old config files and datapacks that overwrote existing Bountiful data may not fu
 - Fixed an issue where boards might show that they are receiving a discount higher than the max of 40% (purely cosmetic)
 - Fixed an issue where dragging the scrollbar on the Bounty Board did not work
 
+### Known Issues
+- `/bo util configToDataPack` will not work correctly if the data file is nested (e.g. `bounty_decrees/xyz_folder/my_decree`)
+
 ## [6.0.3] for 1.20.1 - 2023-07-17
 
 ### Added
@@ -111,6 +125,8 @@ develop for both Fabric and Forge at the same time, releasing for both platforms
 
 
 
+
+
 # Old Fabric Versions (Pre-Merge)
 
 ## [Fabric-5.0.0] for 1.19.4 - 2023-03-21
@@ -128,8 +144,6 @@ develop for both Fabric and Forge at the same time, releasing for both platforms
 - Added compat for new mods such as Tech Reborn, Xtra Arrows and Villager Hats
 - Did a minor balance pass, adding a few rewards where applicable to several pools
 - Added a new Decree called the Inventor Decree, used for redstone and tech mod related items
-- Added a new command, `/bo util configToDataPack`, which converts the current Bountiful config data into a data pack.
-  - It takes two parameters, the pack file name and the pack description
 
 ### Changed
 - Non-core data now loads from built-in resource packs
@@ -143,9 +157,6 @@ develop for both Fabric and Forge at the same time, releasing for both platforms
 
 ### Fixed
 - Fixed rare situation where bounties with unmet dependencies could be partially, but not fully completed
-
-### Known Issues
-- `/bo util configToDataPack` will not work correctly if the data file is nested (e.g. `bounty_decrees/xyz_folder/my_decree`)
 
 ## [Fabric-4.1.1] for 1.19.3 - 2022-03-02
 
@@ -193,73 +204,82 @@ develop for both Fabric and Forge at the same time, releasing for both platforms
 - Initial release of Bountiful
 
 
+
+
+
 # Old Forge Versions (Pre-Merge)
 
-## [Forge-5.0.0] for 1.19.4 - 2023-03-21
+## [3.3.1] for 1.16.4 - 2021-03-14
+
+### Compat
+- Added compatibility with Repurposed Structures villages (#113)
 
 ### Added
-- Added the ability to compost both Bounties and Decrees
-- Added Criterion type objectives - see [the wiki](https://kambrik.ejekta.io/mods/bountiful/) for details!
-  - These objectives allow us to check for objective completion using the same triggers that vanilla uses for Advancements
-  - This allows us to create fun objectives such as "kill a zombie while on fire" if we want!
-- Added Notifications upon bounty completion
-  - Toast notifications and audio notifications (ping sound) are currently added
-  - This can be toggled off in the config
-- Added a patch-overwrite system for data loading for modpack makers
-  - This allows modpack makers to edit/update/remove specific bounties without replacing entire pools
-- Added compat for new mods such as Tech Reborn, Xtra Arrows and Villager Hats
-- Did a minor balance pass, adding a few rewards where applicable to several pools
-- Added a new Decree called the Inventor Decree, used for redstone and tech mod related items
+- Full Spanish language support, thanks to FrannDzs
+
+### Changes
+- Moved items to the Miscellaneous itemgroup
+
+### Fixes
+- Fixed the occasional 'air' bounty when using Bountiful with Quark. (#110)
+- Fixed a rare crash having to do with Decrees (#97, #120)
+- Cleaned up output log (#99, #111)
+
+## [3.3.0] for 1.16.4 - 2021-01-27
+
+### Ported
+- Port from 1.15.2 to 1.16.4
+- Mostly complete feature parity, exceptions listed here
+
+### Changes
+- Changed Kotlin dependency mod from *Kottle* to *Kotlin for Forge*.
+
+### Removals
+- Item-Tag bounty objectives temporarily not working
+- Removed the `/bo hand` command. You should now reload like normal with `/reload`.
+- Removed decrees from Villager & Wandering Trader trades temporarily.
+
+### Fixes
+- Fixed bounty boards not generating in some villages. They will now appear much more reliably.
+
+## [Forge-3.1.2] for 1.14.4 & 1.15.2 - 2020-06-09
+
+### Fixes
+- Update zh_cn & add ru_ru translations (thanks to EnderFor & JokerDima)
+- In 1.15, using ender pearls on a bounty board does not throw the pearl anymore
+- Some ingots now use Forge tags instead of hardcoded item registry names
+- Fix possible "Air" bounties when using Simple Farming and not Vanilla Food Pantry
+- Fixed possible crash when other mods get a bounty's display name
+
+## [Forge-3.1.1] for 1.14.4 & 1.15.2 - 2020-05-06
+
+### Fixes
+- Fixed possible crash when rendering tooltip with certain mods present
+
+## [Forge-3.1.0] for 1.14.4 & 1.15.2 - 2020-03-27
+
+### Added
+- "Tinkering" Decree for redstone objectives/rewards
+- New objectives/rewards to default bounty data
+- Bounty difficulty can now be globally changed via config (`worthRatio`)
+- Allow Decrees to be combined at an anvil (not cheap)
+- New community made Korean & Chinese language support
+- Support for commands as rewards (for modpack makers)
+- New '/bo entities' command to dump a list of all entities to `logs/bountiful.log`
+- New '/bo hand' command to copy hand content to clipboard
+- More compat for some other popular mods
+- Recipes for Bounty Boards and Decrees
+- Bounty boards now keep their inventory when broken
 
 ### Changed
-- Bounty pool entries are each given its own ID so that other mods and data packs can more easily overwrite only parts of our data
-- Fundamentally changed how bounty data is stored in bounties
-  - This will break existing bounties if upgrading a world that used Bountiful from before 1.19.4 to 1.19.4
+- Rebalance some objectives and rewards
+- Datapack structure for more modpack flexibility
 
-### Fixed
-- Fixed rare situation where bounties with unmet dependencies could be partially, but not fully completed
+### Fixes
+- Fix bounty boards not breaking ever
+- Fixed some Item-Tag bounties ("Get X of any Y"/"Rewards X of random Y") causing a crash on servers (#71)
 
-## [Forge-4.1.1] for 1.19.3 - 2022-03-02
-
-### Added
-- Added mod items into the Functional creative tab
-- Added config option for maximum number of rewards per bounty
-
-## [Forge-4.1.0] for 1.19.3 - 2022-03-02
-
-### Removed
-- Removed mod items from creative tabs, this is scheduled to be reimplemented at a later time
-
-## [Forge-2.0.2] for 1.18.1 - 2022-01-09
-
-### Fixed
-- Rebuilt mod with newly compiled class files to avoid default interface method bug with Kambrik 3.0.1 and Bountiful 2.0.1
-
-## [Forge-2.0.1] for 1.18 - 2021-11-21
-
-### Fixed
-- Removed several GUIs that existed for testing purposes
-
-## [Forge-2.0.0] for 1.18 - 2021-11-20
+## [3.0.0] for 1.14.4 & 1.15.2 - 2020-03-11
 
 ### Added
-- A new GUI interface for bounty boards
-- Item Tag bounties
-  - e.g. get 10 of any type of wool
-- Item bounties derived from item tag
-  - e.g. picks a type of wool and asks you to get 10 of it
-- Command rewards for bounties (intended for modpack makers)
-  - runs a command when the bounty completes
-- Bounty boards in villages (as well as newly crafted boards) come pre-populated with bounties
-- Added a slider for bounty objective frequency
-
-### Fixed
-- Fixed a problem with bounty board generation in villages
-- Fixed an issue with reputation levels over 30 being allowed
-
-### Changed
-- Lightly rebalanced many objectives and added some new rewards
-- Lowered default bounty board generation frequency
-
-## [Forge-1.0.0] for 1.17.1 - 2021-08-25
-- Initial release of Bountiful
+- Initial release of Bountiful 3 for v1.14 & v1.15

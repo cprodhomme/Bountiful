@@ -21,9 +21,10 @@ class BountyCreator private constructor(
     private val world: ServerWorld,
     private val pos: BlockPos,
     private val decrees: Set<Decree>,
-    private val rep: Int,
-    private val startTime: Long = 0L,
+    private val rep: Int
 ) {
+    private val startTime: Long = world.time
+
     // Handle matching algorithm direction
     private val rewardsFirst = !BountifulIO.configData.bounty.reverseMatchingAlgorithm
 
@@ -47,8 +48,6 @@ class BountyCreator private constructor(
         }
     }
 
-
-
     val stack: ItemStack by lazy {
         create()
         ItemStack(BountifulContent.BOUNTY_ITEM).apply {
@@ -58,8 +57,6 @@ class BountyCreator private constructor(
     }
 
     fun create(): Pair<BountyData, BountyInfo> {
-        //data = BountyData()
-
         // Gen reward entries and max rarity
         val initialEntries = genInitialEntries()
 
@@ -215,8 +212,8 @@ class BountyCreator private constructor(
             return 1 - (rep.coerceIn(-30..30) / 75.0)
         }
 
-        fun createBountyItem(world: ServerWorld, pos: BlockPos, decrees: Set<Decree>, rep: Int, startTime: Long = 0L): ItemStack {
-            return BountyCreator(world, pos, decrees, rep.coerceIn(-30..30), startTime).stack
+        fun createBountyItem(world: ServerWorld, pos: BlockPos, decrees: Set<Decree>, rep: Int): ItemStack {
+            return BountyCreator(world, pos, decrees, rep.coerceIn(-30..30)).stack
         }
 
         fun getPoolsFor(decrees: Set<Decree>, creationType: CreationType): Set<Pool> {
