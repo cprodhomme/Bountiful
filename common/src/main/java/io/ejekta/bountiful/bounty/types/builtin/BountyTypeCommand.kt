@@ -8,6 +8,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
+import kotlin.random.Random
 
 
 class BountyTypeCommand : IBountyReward {
@@ -34,6 +35,13 @@ class BountyTypeCommand : IBountyReward {
             .replace("%PLAYER_NAME%", player.nameForScoreboard)
             .replace("%PLAYER_NAME_RANDOM", server.playerNames.random())
             .replace("%PLAYER_POSITION%", "${player.pos.x} ${player.pos.y} ${player.pos.z}")
+            // Should not NPE since capture group would fail first
+            .replace(Regex("%RANDOM_INT\\((?<low>-*\\d+),\\s*(?<high>-*\\d+)\\)%")) {
+                result -> Random.nextInt(
+                    result.groups["low"]!!.value.toInt(),
+                    result.groups["high"]!!.value.toInt() + 1 // exclusive until, needs increase by 1
+                ).toString()
+            }
         server.commandManager.executeWithPrefix(server.commandSource, replacedCmd)
     }
 

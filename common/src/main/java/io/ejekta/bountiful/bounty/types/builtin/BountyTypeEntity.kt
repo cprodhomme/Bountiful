@@ -45,6 +45,10 @@ class BountyTypeEntity : IBountyObjective {
     }
 
     fun incrementEntityBounties(playerEntity: ServerPlayerEntity, killedEntity: LivingEntity) {
+        // The player cannot kill themselves (arrow, potion, etc) to complete a bounty
+        if (playerEntity == killedEntity) {
+            return
+        }
         playerEntity.iterateBountyStacks {
             val info = BountyInfo[this]
             val data = BountyData[this]
