@@ -38,12 +38,13 @@ class WalkToBoardTask(val speed: Float) :
 
     override fun keepRunning(serverWorld: ServerWorld?, entity: VillagerEntity?, l: Long) {
         if (serverWorld != null && entity != null) {
-            LookTargetUtil.walkTowards(
-                entity, entity.brain.getOptionalRegisteredMemory(
-                    BountifulContent.MEM_MODULE_NEAREST_BOARD
-                ).get().pos,
-                speed, 1
-            )
+            val memPos = entity.brain.getOptionalRegisteredMemory(BountifulContent.MEM_MODULE_NEAREST_BOARD).getOrNull()?.pos
+            memPos?.let {
+                LookTargetUtil.walkTowards(
+                    entity, it,
+                    speed, 1
+                )
+            }
         }
     }
 
