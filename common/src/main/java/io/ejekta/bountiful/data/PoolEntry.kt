@@ -5,8 +5,8 @@ import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.bounty.types.IBountyType
-import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItem
 import io.ejekta.bountiful.config.JsonFormats
+import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.util.getTagItemKey
 import io.ejekta.bountiful.util.getTagItems
 import io.ejekta.kambrik.ext.identifier
@@ -33,7 +33,7 @@ class PoolEntry private constructor() {
     var rarity = BountyRarity.COMMON
     var content = "Nope"
     var name: String? = null
-    private var icon: @Contextual Identifier? = null // TODO allow custom icons, this works well for criterion
+    private var icon: @Contextual Identifier? = null
     var amount = EntryRange(-1, -1)
     var unitWorth = -1000.0
     var weightMult = 1.0
@@ -41,9 +41,20 @@ class PoolEntry private constructor() {
     var repRequired = 0.0
     private val forbids: MutableList<ForbiddenContent> = mutableListOf()
 
+    val protoPool: Pool?
+        get() = BountifulContent.Pools.find { it.id == id.substringBefore('.') }
+
+    val protoDecrees: List<Decree>
+        get() = protoPool?.usedInDecrees ?: emptyList()
+
     fun isValid(server: MinecraftServer): Boolean {
         return try {
-            BountyTypeRegistry[type]?.isValid(this, server) ?: return false
+            val bountyType = BountyTypeRegistry[type]
+            if (bountyType == null) {
+                Bountiful.LOGGER.warn("Bounty Pool Entry has Invalid Type: (${id} - ${content}) details: ${save()}")
+                return false
+            }
+            bountyType.isValid(this, server)
         } catch (e: Exception) {
             Bountiful.LOGGER.warn("Bounty Pool Entry Invalid: (${id} - ${content}) details: ${save()}")
             false
@@ -64,6 +75,9 @@ class PoolEntry private constructor() {
     val worthSteps: List<Double>
         get() = (amount.min..amount.max).map { it * unitWorth }
 
+    val maxWorth: Double
+        get() = amount.max * unitWorth
+
     fun save(format: Json = JsonFormats.DataPack) = format.encodeToString(serializer(), this)
 
     private fun getRelatedItems(world: ServerWorld): List<Item>? {
@@ -80,18 +94,17 @@ class PoolEntry private constructor() {
         }
     }
 
-    fun toEntry(world: ServerWorld, pos: BlockPos, worth: Double? = null): BountyDataEntry {
+    fun toEntry(world: ServerWorld, pos: BlockPos, worth: Double? = null, usedDecs: Set<String>? = emptySet()): BountyDataEntry {
         val amt = amountAt(worth)
 
         val actualContent = if (type == BountyTypeRegistry.ITEM.id && content.startsWith("#")) {
             val tagId = Identifier(content.substringAfter("#"))
-            val tags = getTagItems(world.registryManager, getTagItemKey(tagId))
-            if (tags.isEmpty()){
+            val items = getTagItems(world.registryManager, getTagItemKey(tagId))
+            if (items.isEmpty()){
                 Bountiful.LOGGER.warn("A pool entry tag has an empty list! $content")
                 "minecraft:air"
             } else {
-                val chosen = tags.random().identifier.toString()
-                chosen
+                items.random().identifier.toString()
             }
         } else {
             content
@@ -111,7 +124,9 @@ class PoolEntry private constructor() {
             isMystery = false,
             rarity = rarity,
             critConditions = conditions
-        )
+        ).apply {
+            relatedDecreeIds = usedDecs ?: emptySet()
+        }
     }
 
     private fun amountAt(worth: Double? = null): Int {
@@ -160,7 +175,7 @@ class PoolEntry private constructor() {
     companion object {
         fun fromKudzu(kv: KudzuVine): PoolEntry {
             @Suppress("RemoveRedundantQualifierName")
-            return JsonFormats.Hand.decodeFromString(PoolEntry.serializer(), kv.toString())
+            return JsonFormats.BlockEntity.decodeFromString(PoolEntry.serializer(), kv.toString())
         }
 
         // With encodeDefaults = false, we need a separate constructor

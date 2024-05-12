@@ -3,12 +3,12 @@ package io.ejekta.bountiful.bounty.types.builtin
 import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.types.IBountyReward
 import io.ejekta.bountiful.data.PoolEntry
-import io.ejekta.kambrik.text.textLiteral
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
+import kotlin.random.Random
 
 
 class BountyTypeCommand : IBountyReward {
@@ -28,14 +28,21 @@ class BountyTypeCommand : IBountyReward {
         return listOf(getDescription(entry))
     }
 
-    override fun giveReward(entry: BountyDataEntry, player: PlayerEntity): Boolean {
-        val server = player.server ?: return false
+    override fun giveReward(entry: BountyDataEntry, player: PlayerEntity) {
+        val server = player.server ?: return
         val replacedCmd = entry.content
             .replace("%BOUNTY_AMOUNT%", entry.amount.toString())
-            .replace("%PLAYER_NAME%", player.entityName)
+            .replace("%PLAYER_NAME%", player.nameForScoreboard)
             .replace("%PLAYER_NAME_RANDOM", server.playerNames.random())
             .replace("%PLAYER_POSITION%", "${player.pos.x} ${player.pos.y} ${player.pos.z}")
-        return server.commandManager.executeWithPrefix(server.commandSource, replacedCmd) > 0
+            // Should not NPE since capture group would fail first
+            .replace(Regex("%RANDOM_INT\\((?<low>-*\\d+),\\s*(?<high>-*\\d+)\\)%")) {
+                result -> Random.nextInt(
+                    result.groups["low"]!!.value.toInt(),
+                    result.groups["high"]!!.value.toInt() + 1 // exclusive until, needs increase by 1
+                ).toString()
+            }
+        server.commandManager.executeWithPrefix(server.commandSource, replacedCmd)
     }
 
 }

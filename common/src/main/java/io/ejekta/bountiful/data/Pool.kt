@@ -1,5 +1,7 @@
 package io.ejekta.bountiful.data
 
+import io.ejekta.bountiful.Bountiful
+import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.kudzu.KudzuVine
@@ -25,12 +27,15 @@ data class Pool(
 
         for ((key, value) in content) {
             if (value != null) {
-                val pe = JsonFormats.Hand.decodeFromString(PoolEntry.serializer(), value.toString()).apply {
-                    this.id = key
+                val pe = JsonFormats.Config.decodeFromString(PoolEntry.serializer(), value.toString()).apply {
+                    this.id = "${this@Pool.id}.$key"
                 }
                 // Don't insert entries with no type set
                 if (pe.typeLogic != null) {
                     items.add(pe)
+                } else {
+                    Bountiful.LOGGER.warn("Pool entry '${pe.id}' is using an invalid type '${pe.type.path}' and will be skipped.")
+                    Bountiful.LOGGER.warn("* Valid entry types: ${BountyTypeRegistry.map { it.id.path }}")
                 }
             }
         }
@@ -54,7 +59,7 @@ data class Pool(
 
         val newContent = content.toMutableMap()
 
-        println("Merging $id with ${other.id}")
+        Bountiful.LOGGER.info("Merging $id with ${other.id}")
 
         for ((otherKey, otherValue) in other.content) {
 
@@ -64,8 +69,8 @@ data class Pool(
                 newContent[otherKey] = null
             } else {
 
-                println("Merge candidate: ${content[otherKey]}")
-                println("Merge new edits: $otherValue")
+                Bountiful.LOGGER.debug("Merge candidate: ${content[otherKey]}")
+                Bountiful.LOGGER.debug("Merge new edits: $otherValue")
 
                 // key is in new content, must graft merge
                 val currSrc = content[otherKey]?.toKudzu() ?: KudzuVine()
@@ -78,7 +83,7 @@ data class Pool(
 
                 newContent[otherKey] = graftedVine.toJsonObject()
 
-                println("Newly Merged: ${newContent[otherKey]}")
+                Bountiful.LOGGER.info("* Newly Merged: $otherKey ${newContent[otherKey]}")
             }
 
         }

@@ -1,25 +1,33 @@
 package io.ejekta.bountiful.util
 
 import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.content.BountyItem
-import net.fabricmc.api.EnvType
-import net.fabricmc.loader.api.FabricLoader
+import io.ejekta.bountiful.content.BountifulContent
+import io.ejekta.bountiful.content.board.BoardBlockEntity
+import io.ejekta.bountiful.content.gui.BoardScreenHandler
+import io.ejekta.bountiful.content.item.BountyItem
+import io.ejekta.kambrik.message.ClientMsg
 import net.minecraft.client.MinecraftClient
+import net.minecraft.entity.ai.brain.Brain
+import net.minecraft.entity.ai.brain.MemoryModuleType
+import net.minecraft.entity.passive.VillagerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
-import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.tag.TagKey
-import net.minecraft.server.MinecraftServer
+import net.minecraft.screen.ScreenHandlerFactory
+import net.minecraft.screen.SimpleNamedScreenHandlerFactory
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.GlobalPos
+import net.minecraft.village.TradeOffer
 import net.minecraft.world.World
+import java.util.*
 import kotlin.random.Random
 
 fun randomSplit(num: Double, ways: Int): List<Double> {
@@ -27,6 +35,9 @@ fun randomSplit(num: Double, ways: Int): List<Double> {
     val sum = bits.sum()
     return bits.map { (it / sum) * num }
 }
+
+val ClientMsg.ctx: MinecraftClient
+    get() = MinecraftClient.getInstance()
 
 val Inventory.readOnlyCopy: DefaultedList<ItemStack>
     get() = DefaultedList.ofSize(size(), ItemStack.EMPTY).apply {
@@ -41,6 +52,12 @@ fun <T : Any> List<T>.weightedRandomIntBy(func: T.() -> Int): T {
 fun <T : Any> List<T>.weightedRandomDblBy(func: T.() -> Double): T {
     val mapped = associate { it to func(it) }
     return mapped.weightedRandomDbl()
+}
+
+fun World.everySeconds(secs: Int, offset: Long = 0L, func: () -> Unit) {
+    if (((time + (secs * GameTime.TICK_RATE) + offset) % GameTime.TICK_RATE) == 0L) {
+        func()
+    }
 }
 
 fun <T : Any> Map<T, Int>.weightedRandomInt(): T {
@@ -131,8 +148,53 @@ fun ServerPlayerEntity.iterateBountyData(func: BountyData.() -> Boolean) {
     }
 }
 
+fun Brain<*>.ensureMemoryModules(memoryList: List<MemoryModuleType<*>>) {
+    val memMM = memories as MutableMap
+    for (item in memoryList) {
+        if (item !in memMM) {
+            memMM[item] = Optional.empty()
+        }
+    }
+}
 
+fun ServerPlayerEntity.openHandledScreenSimple(screenName: Text, handlerFactory: ScreenHandlerFactory): OptionalInt {
+    return openHandledScreen(
+        SimpleNamedScreenHandlerFactory(
+            handlerFactory, screenName
+        )
+    )
+}
 
+fun VillagerEntity.checkOnBoard(boardPos: BlockPos) {
+    // Inject memory into memory map, else remembrance will fail
+    brain.ensureMemoryModules(listOf(
+        BountifulContent.MEM_MODULE_NEAREST_BOARD
+    ))
+    // Set up villager memory
+    brain.remember(
+        BountifulContent.MEM_MODULE_NEAREST_BOARD, GlobalPos.create(
+        world.registryKey, boardPos
+    ))
+}
+
+fun VillagerEntity.hackyGiveTradeExperience(amt: Int) {
+    trade(
+        TradeOffer(ItemStack.EMPTY, ItemStack.EMPTY, 1, amt, 1f).apply {
+            rewardingPlayerExperience = false
+        }
+    )
+}
+
+val ServerPlayerEntity.currentBoardInteracting: BoardBlockEntity?
+    get() {
+        val shPos = (currentScreenHandler as? BoardScreenHandler)?.inventory?.pos
+        shPos?.run {
+            serverWorld.getBlockEntity(this)?.let {
+                return (it as? BoardBlockEntity)
+            }
+        }
+        return null
+    }
 
 
 

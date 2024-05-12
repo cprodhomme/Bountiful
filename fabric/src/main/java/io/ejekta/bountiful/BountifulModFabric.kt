@@ -5,13 +5,16 @@ import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.BountifulReloadListener
 import io.ejekta.bountiful.content.BountifulCommands
 import io.ejekta.bountiful.content.BountifulContent
+import io.ejekta.bountiful.content.villager.DecreeTradeFactory
 import io.ejekta.kambrik.Kambrik
 import io.ejekta.kambrik.internal.registration.KambrikRegistrar
+import kotlinx.serialization.json.JsonObject
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
+import net.fabricmc.fabric.api.`object`.builder.v1.trade.TradeOfferHelper
 import net.fabricmc.fabric.api.registry.CompostingChanceRegistry
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType
@@ -34,7 +37,8 @@ class BountifulModFabric : ModInitializer {
             "gofish",
             "techreborn",
             "villager-hats",
-            "xtraarrows"
+            "xtraarrows",
+            "numismatic-overhaul"
         ).forEach {
             val ourContainer = FabricLoader.getInstance().getModContainer(Bountiful.ID).get()
             if (FabricLoader.getInstance().isModLoaded(it)) {
@@ -60,8 +64,7 @@ class BountifulModFabric : ModInitializer {
 
         CommandRegistrationCallback.EVENT.register(CommandRegistrationCallback(BountifulCommands::register))
 
-        CompostingChanceRegistry.INSTANCE.add({ BountifulContent.BOUNTY_ITEM }, 0.5f)
-        CompostingChanceRegistry.INSTANCE.add({ BountifulContent.DECREE_ITEM }, 0.85f)
+        Bountybridge.registerCompostables()
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register { e ->
             e.add(BountifulContent.DECREE_ITEM)
@@ -69,15 +72,7 @@ class BountifulModFabric : ModInitializer {
         }
 
         ServerLifecycleEvents.SERVER_STARTING.register(ServerLifecycleEvents.ServerStarting { server ->
-            listOf("plains", "savanna", "snowy", "taiga", "desert").forEach { villageType ->
-                Bountiful.LOGGER.info("Registering Bounty Board Jigsaw Piece for Village Type: $villageType")
-                Kambrik.Structure.addToStructurePool(
-                    server,
-                    Identifier("bountiful:village/common/bounty_gazebo"),
-                    Identifier("minecraft:village/$villageType/houses"),
-                    BountifulIO.configData.boardGenFrequency
-                )
-            }
+            Bountybridge.registerJigsawPieces(server)
         })
 
         // Increment entity bounties for all players within 12 blocks of the player and all players within 12 blocks of the mob
@@ -85,10 +80,23 @@ class BountifulModFabric : ModInitializer {
             Bountybridge.handleEntityKills(world, entity, killedEntity)
         })
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(ItemGroupEvents.ModifyEntries {
-            it.add(BountifulContent.BOARD_ITEM)
-            it.add(BountifulContent.DECREE_ITEM)
-        })
+        TradeOfferHelper.registerWanderingTraderOffers(1) {
+            Bountybridge.modifyTradeList(it)
+        }
+
+        TradeOfferHelper.registerRebalancedWanderingTraderOffers {
+            it.pool(
+                Bountiful.id("merchant_trade_offers"), 1, DecreeTradeFactory()
+            )
+        }
+
+        for ((group, items) in Bountybridge.getItemGroups()) {
+            ItemGroupEvents.modifyEntriesEvent(group).register(ItemGroupEvents.ModifyEntries {
+                for (item in items) {
+                    it.add(item)
+                }
+            })
+        }
 
         Bountybridge.registerCriterionStuff()
     }

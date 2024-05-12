@@ -1,5 +1,6 @@
 package io.ejekta.bountiful.client.widgets
 
+import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
@@ -7,11 +8,10 @@ import io.ejekta.bountiful.bounty.types.builtin.BountyTypeEntity
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItem
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItemTag
 import io.ejekta.bountiful.client.BoardScreen
-import io.ejekta.bountiful.content.messages.SelectBounty
-import io.ejekta.bountiful.kambrik.gui.KGuiDsl
-import io.ejekta.bountiful.kambrik.gui.KSpriteGrid
-import io.ejekta.bountiful.kambrik.gui.KWidget
-import io.ejekta.bountiful.kambrik.gui.reactor.MouseReactor
+import io.ejekta.bountiful.messages.SelectBounty
+import io.ejekta.kambrik.gui.draw.KGuiDsl
+import io.ejekta.kambrik.gui.draw.KWidget
+import io.ejekta.kambrik.gui.draw.reactor.MouseReactor
 import io.ejekta.kambrik.text.textLiteral
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.EntityType
@@ -24,14 +24,14 @@ import net.minecraft.util.Identifier
 
 class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget {
 
-    override val width: Int = 160
-    override val height: Int = 20
+    override val width: Int = ButtonWidth
+    override val height: Int = ButtonHeight
 
     fun getBountyData(): BountyData {
         return BountyData[parent.boardHandler.inventory.getStack(bountyIndex)]
     }
 
-    val reactor = MouseReactor().apply {
+    private val reactor = MouseReactor().apply {
         onClickDown = { relX, relY, button ->
             parent.boardHandler.inventory.select(bountyIndex)
             SelectBounty(bountyIndex, MinecraftClient.getInstance().player!!.uuidAsString).sendToServer()
@@ -41,7 +41,7 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
     private fun renderEntryBasedOnLogic(dsl: KGuiDsl, entry: BountyDataEntry, x: Int, y: Int, isReward: Boolean) {
         when (entry.logicId) {
             BountyTypeRegistry.COMMAND.id -> {
-                dsl { itemStackIcon(ItemStack(Items.COMMAND_BLOCK), x, y) }
+                dsl { itemStackIcon(ItemStack(Items.COMMAND_BLOCK), x, y + 1) }
             }
             BountyTypeRegistry.ITEM.id -> {
                 val stack = BountyTypeItem.getItemStack(entry).apply {
@@ -65,12 +65,10 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
                     return
                 }
 
-                dsl {
+                dsl.area(x, y, 16, 16) {
                     livingEntity(entityType as? EntityType<out LivingEntity>
                         ?: throw Exception("Bounty cannot have ${entry.content} as entity objective, it is not a LivingEntity!"),
-                        x + 7,
-                        y + 15,
-                        size = 15.0
+                        size = 14.0
                     )
                 }
             }
@@ -110,7 +108,7 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
         }
     }
 
-    fun isSelected(): Boolean {
+    private fun isSelected(): Boolean {
         return ItemStack.areEqual(parent.boardHandler.inventory.getStack(-1), parent.boardHandler.inventory.getStack(bountyIndex))
     }
 
@@ -118,8 +116,7 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
         area.reactWith(reactor)
         area.dsl {
             // Draw button background
-            sprite(DEFAULT, w = DEFAULT.width - 42)
-            sprite(CAP, DEFAULT.width - 42)
+            img(BUTTON, width, height)
 
             area(width, height) {
                 if (isSelected()) {
@@ -137,20 +134,40 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
             val data = getBountyData()
 
             // Render objectives
-            for (i in data.objectives.indices) {
-                renderEntry(this, data.objectives[i], i * 20 + 1, 1)
+            renderEntries(data.objectives) { rx, ry, e ->
+                renderEntry(this, e, rx, ry, false)
             }
+
+            offset(width / 2 - 10, 0) {
+                img(ARROW, 20, 20)
+            }
+
             // Render rewards
-            for (i in data.rewards.indices) {
-                renderEntry(this, data.rewards[i], width - (20 * (i + 1)), 1, isReward = true)
+            renderEntries(data.rewards) { rx, ry, e ->
+                renderEntry(this, e, BountyZoneSize + ArrowWidth + rx, ry, true)
             }
         }
     }
 
     companion object {
-        val SHEET = KSpriteGrid(Identifier("textures/gui/widgets.png"), 256, 256)
-        val DEFAULT = SHEET.Sprite(0f, 66f, 200, 20)
-        val CAP = SHEET.Sprite(198f, 66f, 2, 20)
+        val BUTTON = Identifier("widget/button")
+        val ARROW = Bountiful.id("arrow")
+
+        const val ButtonWidth = 160
+        const val ButtonHeight = 20
+        const val ArrowWidth = 20
+        const val BountyZoneSize = (ButtonWidth - ArrowWidth) / 2
+
+        fun KGuiDsl.renderEntries(entries: List<BountyDataEntry>, renderFunc: KGuiDsl.(rx: Int, ry: Int, e: BountyDataEntry) -> Unit) {
+            for (i in entries.indices) {
+                val spaceDiff = BountyZoneSize - (entries.size * 18)
+                val spaceStart = spaceDiff / 2
+                renderFunc(
+                    (spaceStart + (i * 18)), 1, entries[i]
+                )
+            }
+        }
+
     }
 
 }

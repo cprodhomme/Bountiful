@@ -4,7 +4,7 @@ import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.bounty.types.IBountyReward
 import io.ejekta.bountiful.config.JsonFormats
-import io.ejekta.bountiful.content.messages.OnBountyComplete
+import io.ejekta.bountiful.messages.OnBountyComplete
 import io.ejekta.kambrik.serial.ItemDataJson
 import kotlinx.serialization.Serializable
 import net.minecraft.entity.player.PlayerEntity
@@ -13,7 +13,6 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
-import net.minecraft.util.Formatting
 
 @Suppress("RemoveRedundantQualifierName")
 @Serializable
@@ -22,6 +21,10 @@ class BountyData {
     val objectives = mutableListOf<BountyDataEntry>()
     val rewards = mutableListOf<BountyDataEntry>()
     private var pingComplete: Boolean = false
+
+    fun <T : IBountyObjective> objectivesOfType(type: T): List<BountyDataEntry> {
+        return objectives.filter { it.logic == type }
+    }
 
     private fun hasFinishedAllObjectives(player: PlayerEntity): Boolean {
         return objectives.all {
@@ -36,11 +39,9 @@ class BountyData {
     }
 
     fun checkForCompletionAndAlert(player: PlayerEntity, stack: ItemStack): BountyData {
-
-
         val isDone = objectives.all {
             (it.logic as IBountyObjective).getProgress(it, player).isComplete()
-        } && BountyInfo[stack].timeLeft(player.world) > 0
+        } && BountyInfo[stack].timeLeftTicks(player.world) > 0
 
         if (isDone) {
 
@@ -87,9 +88,11 @@ class BountyData {
         }
     }
 
+
+
     fun tryCashIn(player: PlayerEntity, stack: ItemStack): Boolean {
 
-        if (BountyInfo[stack].timeLeft(player.world) <= 0) {
+        if (BountyInfo[stack].timeLeftTicks(player.world) <= 0) {
             player.sendMessage(Text.translatable("bountiful.bounty.expired"))
             return false
         }

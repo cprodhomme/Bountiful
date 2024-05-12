@@ -6,11 +6,15 @@ import io.ejekta.bountiful.bounty.types.Progress
 import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.bountiful.util.getTagItemKey
 import io.ejekta.bountiful.util.getTagItems
+import io.ejekta.kambrik.bridge.Kambridge
 import io.ejekta.kambrik.ext.collect
 import io.ejekta.kambrik.ext.identifier
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.item.TooltipContext
+import net.minecraft.enchantment.EnchantmentHelper
 import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.EnchantedBookItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.registry.Registries
@@ -19,6 +23,7 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
+import kotlin.jvm.optionals.getOrNull
 
 
 class BountyTypeItem : IBountyExchangeable {
@@ -74,7 +79,7 @@ class BountyTypeItem : IBountyExchangeable {
         return false
     }
 
-    override fun giveReward(entry: BountyDataEntry, player: PlayerEntity): Boolean {
+    override fun giveReward(entry: BountyDataEntry, player: PlayerEntity) {
         val item = getItem(entry)
         val toGive = (0 until entry.amount).chunked(item.maxCount).map { it.size }
 
@@ -90,8 +95,6 @@ class BountyTypeItem : IBountyExchangeable {
                 player.world.spawnEntity(stackEntity)
             }
         }
-
-        return true
     }
 
     companion object {
@@ -111,7 +114,23 @@ class BountyTypeItem : IBountyExchangeable {
         }
 
         fun getItemName(entry: BountyDataEntry): MutableText {
-            return getItem(entry).name.copy()
+            val itemStack = getItemStack(entry)
+            var named = itemStack.name.copy()
+
+            // Show enchanted book enchantments
+            if (itemStack.item is EnchantedBookItem && Kambridge.isOnClient()) {
+                val enchants = EnchantmentHelper.get(itemStack).toList()
+
+                if (enchants.isNotEmpty()) {
+                    named = named.append(" (")
+                    for ((enchant, level) in enchants.dropLast(1)) {
+                        named = named.append(enchant.getName(level)).append(", ")
+                    }
+                    named = named.append(enchants.last().run { first.getName(second) }).append(")")
+                }
+            }
+
+            return named
         }
     }
 

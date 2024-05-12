@@ -1,12 +1,10 @@
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version libs.versions.kotlin
-    kotlin("plugin.serialization") version libs.versions.ksx
+    kotlin("plugin.serialization") version libs.versions.kotlin
     base
     // https://maven.architectury.dev/architectury-plugin/architectury-plugin.gradle.plugin/
     id("architectury-plugin") version libs.versions.architectury
@@ -34,7 +32,7 @@ tasks {
         // Copy the outputs of the tasks...
         from(tasks)
         // ...into build/libs.
-        into(buildDir.resolve("libs"))
+        into(layout.buildDirectory.get().dir("libs"))
     }
 
     // Set up assemble to depend on the collectJars task, so it gets run on gradlew build.
@@ -115,6 +113,7 @@ subprojects {
                 inputFile.set(named<ShadowJar>("shadowJar").flatMap { it.archiveFile })
                 dependsOn("shadowJar")
                 archiveClassifier.set(project.name)
+
             }
             "jar"(Jar::class) { archiveClassifier.set("dev") }
         }

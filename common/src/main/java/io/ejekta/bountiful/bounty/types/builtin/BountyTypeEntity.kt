@@ -36,7 +36,7 @@ class BountyTypeEntity : IBountyObjective {
             ).formatted(progress.color).append(
                 progress.neededText.colored(Formatting.WHITE)
             )
-            false -> error("Cannot have an entity (${entry.content}) as a reward.")
+            false -> Text.literal("ERR: Cannot have an entity (${entry.content}) as a reward.")
         }
     }
 
@@ -45,6 +45,10 @@ class BountyTypeEntity : IBountyObjective {
     }
 
     fun incrementEntityBounties(playerEntity: ServerPlayerEntity, killedEntity: LivingEntity) {
+        // The player cannot kill themselves (arrow, potion, etc) to complete a bounty
+        if (playerEntity == killedEntity) {
+            return
+        }
         playerEntity.iterateBountyStacks {
             val info = BountyInfo[this]
             val data = BountyData[this]

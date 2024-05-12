@@ -7,13 +7,10 @@ import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.bountiful.util.getTagItemKey
 import io.ejekta.bountiful.util.getTagItems
 import io.ejekta.kambrik.ext.collect
-import io.ejekta.kambrik.text.textLiteral
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
 import net.minecraft.registry.Registries
-import net.minecraft.registry.tag.ItemTags
 import net.minecraft.registry.tag.TagKey
 import net.minecraft.server.MinecraftServer
 import net.minecraft.text.MutableText
@@ -53,13 +50,11 @@ class BountyTypeItemTag : IBountyExchangeable {
     override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
         return listOf(
             if (entry.name != null) {
-                textLiteral(entry.name!!)
+                Text.literal(entry.name!!)
             } else {
                 entry.translation
             },
-            textLiteral(entry.content) {
-                format(Formatting.DARK_GRAY)
-            }
+            Text.literal(entry.content).formatted(Formatting.DARK_GRAY)
         )
     }
 
@@ -80,7 +75,9 @@ class BountyTypeItemTag : IBountyExchangeable {
         } ?: false
     }
 
-    override fun giveReward(entry: BountyDataEntry, player: PlayerEntity) = false
+    override fun giveReward(entry: BountyDataEntry, player: PlayerEntity) {
+        // NO-OP
+    }
 
     companion object {
         private fun getTag(entry: BountyDataEntry) = TagKey.of(Registries.ITEM.key, Identifier(entry.content))
