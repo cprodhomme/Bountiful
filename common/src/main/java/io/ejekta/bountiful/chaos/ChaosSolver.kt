@@ -15,9 +15,10 @@ class ChaosSolver(recipeManager: RecipeManager, private val regManager: DynamicR
 
     val rawDepMap = mutableMapOf<ItemStack, MutableSet<ItemStack>>()
 
-    val itemLookup = recipeManager.values().toList().groupBy { it.getOutput(regManager).item }
 
-    val recipeLookup = recipeManager.values().toList().associateBy { it.getOutput(regManager) }
+    val itemLookup = recipeManager.values().toList().groupBy { it.value.getResult(regManager).item }
+
+    val recipeLookup = recipeManager.values().toList().associateBy { it.value.getResult(regManager) }
 
 //    fun computeTree() {
 //
@@ -85,7 +86,7 @@ class ChaosSolver(recipeManager: RecipeManager, private val regManager: DynamicR
         // cache holds all paths to making that itemstack
         cache: MutableMap<ItemStack, MutableList<MutableList<ItemStack>>> = mutableMapOf() // shared cache across all recursions
     ) {
-        val out = recipe.getOutput(regManager)
+        val out = recipe.getResult(regManager)
         val ings = recipe.ingredients
 
         path.add(out)
@@ -127,10 +128,10 @@ class ChaosSolver(recipeManager: RecipeManager, private val regManager: DynamicR
     fun createTree() {
         val id = Identifier("iron_axe")
         val recipe = recipeMap.getValue(id)
-        val out = recipe.getOutput(regManager)
+        val out = recipe.value.getResult(regManager)
         val root = MatNode(out)
 
-        recipe.ingredients.first().matchingStacks
+        recipe.value.ingredients.first().matchingStacks
 
         //val abc = Ingredient.
 

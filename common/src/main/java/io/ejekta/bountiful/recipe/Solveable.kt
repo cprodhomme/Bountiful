@@ -2,11 +2,12 @@ package com.example.recipe
 
 import com.example.recipe.RecursiveRecipeParser.Companion.getStackOrPut
 import com.example.recipe.RecursiveRecipeParser.Companion.stackKey
+import io.ejekta.kambrik.ext.identifier
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.RecipeType
 
-data class Solveable(val ingredients: List<Ingredient>, val makes: Int, val type: RecipeType<*>) {
+class Solveable(val ingredients: List<Ingredient>, val makes: Int, val type: RecipeType<*>) {
     fun solve(parser: RecursiveRecipeParser, seen: MutableSet<ItemStack>, deep: Int): Int? {
         val routes = ingredients.map { ingr ->
             val staks = ingr.matchingStacks.toList().filter { parser.visited.stackKey(it) !in seen }
@@ -31,4 +32,11 @@ data class Solveable(val ingredients: List<Ingredient>, val makes: Int, val type
             routes.sum()
         }
     }
+
+    override fun toString(): String {
+        return "Solveable(ingredients=${ingredients.map { 
+            ingredient -> ingredient.matchingStacks.map { it.identifier }.joinToString("/") 
+        }}, makes=$makes, type=$type)"
+    }
+
 }

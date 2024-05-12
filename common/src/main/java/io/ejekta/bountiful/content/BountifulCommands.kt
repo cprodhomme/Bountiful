@@ -7,6 +7,7 @@ import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
+import io.ejekta.bountiful.chaos.ChaosMode
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.content.gui.AnalyzerScreenHandler
@@ -32,6 +33,7 @@ import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.predicate.NumberRange
+import net.minecraft.registry.Registries
 import net.minecraft.registry.entry.RegistryEntry
 import net.minecraft.screen.MerchantScreenHandler
 import net.minecraft.screen.ScreenHandler
@@ -157,6 +159,34 @@ object BountifulCommands {
                         }
                     }
 
+                    "chaos" {
+                        "get" runs {
+                            ChaosMode.getRecipes()
+                        }
+                        "test" runs {
+                            try {
+                                ChaosMode.test(source.server)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        "old" {
+                            val allItems = Registries.ITEM.keys.map { it.value }
+                            val sugg = suggestionList { allItems }
+                            argIdentifier("item", sugg) { item ->
+                                this runs {
+                                    val picked = Registries.ITEM.get(item())
+                                    try {
+                                        val rep = RecursiveRecipeParser(source.server).apply { query(ItemStack(picked)) }
+                                        println("Ok!")
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     "dump" runs dumpData()
 
                     "dev" {
@@ -182,27 +212,6 @@ object BountifulCommands {
                     argString("packFileName") { resName ->
                         argString("packDescInQuotes") runs { resDesc ->
                             exportToPack(resName(), resDesc())
-                        }
-                    }
-                }
-            }
-
-            "chaos" {
-                "get" runs {
-                    ChaosMode.getRecipes()
-                }
-                "old" {
-                    val allItems = Registries.ITEM.keys.map { it.value }
-                    val sugg = suggestionList { allItems }
-                    argIdentifier("item", sugg) { item ->
-                        this runs {
-                            val picked = Registries.ITEM.get(item())
-                            try {
-                                val rep = RecursiveRecipeParser(source.server).apply { query(ItemStack(picked)) }
-                                println("Ok!")
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
                         }
                     }
                 }

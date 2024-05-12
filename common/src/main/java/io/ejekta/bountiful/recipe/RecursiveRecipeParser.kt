@@ -43,10 +43,10 @@ class RecursiveRecipeParser(val server: MinecraftServer) {
         println("Querying $itemStack")
 
         val producers = recipeManager.values().filter {
-            ItemStack.areItemsEqual(it.getOutput(server.registryManager), itemStack)
+            ItemStack.areItemsEqual(it.value.getResult(server.registryManager), itemStack)
         }
 
-        recipeManager.values().first().ingredients.first().matchingStacks.toList()
+        recipeManager.values().first().value.ingredients.first().matchingStacks.toList()
 
         println("Found ${producers.size} Producers")
 
@@ -57,12 +57,12 @@ class RecursiveRecipeParser(val server: MinecraftServer) {
         for (producer in producers) {
             println("\t* Processing Producer: ${producer.id}")
 
-            val solveable = Solveable(producer.ingredients, producer.getOutput(server.registryManager).count, producer.type)
+            val solveable = Solveable(producer.value.ingredients, producer.value.getResult(server.registryManager).count, producer.value.type)
 
             visitList.add(solveable)
 
             // Visit all stacks
-            for (input in producer.ingredients.map { it.matchingStacks.toList() }.flatten()) {
+            for (input in producer.value.ingredients.map { it.matchingStacks.toList() }.flatten()) {
                 if (!hasVisited(input)) {
                     query(input)
                 }
