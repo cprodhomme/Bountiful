@@ -283,3 +283,48 @@ develop for both Fabric and Forge at the same time, releasing for both platforms
 
 ### Added
 - Initial release of Bountiful 3 for v1.14 & v1.15
+
+## [2.2.0] for 1.12.2 - 2019-02-12
+
+### Added
+- Add localizations for zh_ch and ru_ru
+- Implement NBT on item entries
+- Enhance tooltips with item mod origin
+- Rewards are now weighted
+- Added basic Game Stages support
+- Implement min-max values for reward item stacks
+- Added differing textures based on bounty tier
+- Added an advanced view for bounty tooltips
+
+## [2.1.0] for 1.12.2 - 2019-01-17
+
+### Added
+- Bounty boards now generate in villages
+- Localization support has been added
+- Added an option for greedy reward selection (always pick the most expensive rewards first)
+- Added local bounty stats
+
+## [2.0] for 1.12.2 - 2018-12-31
+
+### Added
+- Bounties can now optionally tick down on the bounty board, instead of being frozen in time until picked up
+- This means that bounties will now continue to tick down in chests and other inventories
+- Added entity bounties (e.g. against zombies or skeletons)
+
+### Changed
+- The board is now optionally unbreakable
+
+## [1.1] for 1.12.2 - 2018-12-24
+
+### Added
+- Expanded config options (bounty min, max, time multiplier, minimum bounty time)
+- Hot reloading defaults to old config data if there is a data error
+
+### Changed
+- We have added new board art, courtesy of AkiShirai
+
+## [1.0] for 1.12.2 - 2018-12-22
+
+Initial release of Bountiful
+
+
