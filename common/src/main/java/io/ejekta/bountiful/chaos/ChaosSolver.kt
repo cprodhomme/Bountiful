@@ -11,8 +11,6 @@ class ChaosSolver(recipeManager: RecipeManager, private val regManager: DynamicR
 
     private val recipeMap = recipeManager.values().toList().associateBy { it.id }
 
-    val tree = ChaosTree()
-
     val rawDepMap = mutableMapOf<ItemStack, MutableSet<ItemStack>>()
 
 

@@ -1,7 +1,7 @@
 package io.ejekta.bountiful.chaos
 
-import net.minecraft.item.ItemStack
+import net.minecraft.item.Item
 
-class ChaosItem(val stack: ItemStack, var factor: Double = 1.0) {
+class ChaosItem(val item: Item, var factor: Double = 1.0) {
 
 }

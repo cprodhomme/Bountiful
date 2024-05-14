@@ -5,6 +5,7 @@ import io.ejekta.kambrik.ext.identifier
 import net.minecraft.client.MinecraftClient
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
+import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 
 object ChaosMode {
@@ -22,25 +23,20 @@ object ChaosMode {
 
     }
 
-    var rep: RecursiveRecipeParser? = null
-
     fun test(server: MinecraftServer) {
+
+        val solver = DepthSolver(server)
+        for (item in server.registryManager.get(Registries.ITEM.key)) {
+            //println("Solving for: $item")
+            solver.solveFor(ItemStack(item), emptyList())
+        }
+
         val goldHoeItem = ItemStack(Items.GOLDEN_HOE)
-        if (rep == null) {
-            rep = RecursiveRecipeParser(server).apply { query(goldHoeItem) }
-        }
 
-        with(rep!!) {
+        solver.solveFor(goldHoeItem, emptyList())
+        println("Done with solves!")
 
-            val solves = getSolveables(goldHoeItem)
-
-            println("Solves:")
-            println(solves)
-
-
-        }
-
-
+        solver.emitTerminators()
     }
 
 }
