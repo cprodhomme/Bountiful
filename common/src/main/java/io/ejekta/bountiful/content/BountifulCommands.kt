@@ -160,29 +160,11 @@ object BountifulCommands {
                     }
 
                     "chaos" {
-                        "get" runs {
-                            ChaosMode.getRecipes()
-                        }
                         "test" runs {
                             try {
                                 ChaosMode.test(source.server)
                             } catch (e: Exception) {
                                 e.printStackTrace()
-                            }
-                        }
-                        "old" {
-                            val allItems = Registries.ITEM.keys.map { it.value }
-                            val sugg = suggestionList { allItems }
-                            argIdentifier("item", sugg) { item ->
-                                this runs {
-                                    val picked = Registries.ITEM.get(item())
-                                    try {
-                                        val rep = RecursiveRecipeParser(source.server).apply { query(ItemStack(picked)) }
-                                        println("Ok!")
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
-                                }
                             }
                         }
                     }

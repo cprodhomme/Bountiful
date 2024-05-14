@@ -13,23 +13,11 @@ object ChaosMode {
     // For now, we'll just test clientside. This can easily be moved to server later
     val mc = MinecraftClient.getInstance()
 
-    fun getRecipes() {
-
-        val rm = mc.server?.recipeManager ?: return
-        val re = mc.server?.registryManager ?: return
-        val recipes = rm.values()
-        val solver = ChaosSolver(rm, re)
-        //solver.computeTree()
-
-    }
-
     fun test(server: MinecraftServer) {
 
         val solver = DepthSolver(server)
-        for (item in server.registryManager.get(Registries.ITEM.key)) {
-            //println("Solving for: $item")
-            solver.solveFor(ItemStack(item), emptyList())
-        }
+
+        solver.solveRequiredRecipes()
 
         val goldHoeItem = ItemStack(Items.GOLDEN_HOE)
 

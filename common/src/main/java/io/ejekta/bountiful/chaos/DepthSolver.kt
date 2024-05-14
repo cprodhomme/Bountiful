@@ -5,7 +5,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeManager
-import net.minecraft.registry.DynamicRegistryManager
+import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 
 class DepthSolver(server: MinecraftServer) {
@@ -23,7 +23,6 @@ class DepthSolver(server: MinecraftServer) {
     val rawDepMap = mutableMapOf<Item, MutableSet<Item>>()
 
     fun submitFinalCost(item: Item, cost: Double) {
-        rawDepMap.remove(item)
         costMap[item] = cost
     }
 
@@ -52,6 +51,8 @@ class DepthSolver(server: MinecraftServer) {
             terminators.add(stack.identifier.toString())
             return null
         }
+
+        val recipeCosts = mutableListOf<Double>()
 
         for (recipe in recipes) {
             val inputCounts = recipe.inItemSets.flatten().groupBy { it.item }.map { it.key to it.value.sumOf { stack -> stack.count } }.toMap()
@@ -91,13 +92,27 @@ class DepthSolver(server: MinecraftServer) {
                 //println("Could not solve for ${stack.identifier}".padStart(padding))
             } else {
                 //println("Resolved all ingredients for: ${stack.identifier}".padStart(padding))
-                submitFinalCost(stack.item, ingredientRunningCost)
+                recipeCosts.add(ingredientRunningCost)
                 //println("Cost was: $ingredientRunningCost".padStart(padding))
             }
 
         }
 
+        // Of all calculated recipe costs, find the minimum
+        recipeCosts.minOrNull()?.let {
+            costMap[stack.item] = it
+        }
+
         return null
+    }
+
+    fun solveRequiredRecipes() {
+        for (item in regManager.get(Registries.ITEM.key)) {
+            // If there exists a recipe for it, solve it
+            if (item in stackLookup.keys) {
+                solveFor(ItemStack(item), emptyList())
+            }
+        }
     }
 
     fun emitTerminators() {
