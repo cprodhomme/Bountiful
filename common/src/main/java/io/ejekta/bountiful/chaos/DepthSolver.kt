@@ -1,6 +1,5 @@
 package io.ejekta.bountiful.chaos
 
-import io.ejekta.bountiful.config.BountifulChaosData
 import io.ejekta.kambrik.ext.identifier
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
@@ -9,28 +8,34 @@ import net.minecraft.recipe.RecipeManager
 import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.Identifier
+import kotlin.jvm.optionals.getOrNull
 
-class DepthSolver(server: MinecraftServer) {
+class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData) {
 
     private val recipeManager: RecipeManager = server.recipeManager
     private val regManager = server.registryManager
 
-    val terminators = mutableSetOf<Identifier>()
+    private val terminators = mutableSetOf<Identifier>()
+    private val deps = mutableMapOf<Identifier, MutableSet<Identifier>>()
 
     // Final cost map
-    val costMap = mutableMapOf<Item, Double>()
+    private val costMap = mutableMapOf<Item, Double>()
 
-    val ItemStack.recipes: List<RecipeEntry<*>>
+    // Populate cost map from config
+    init {
+        for (itemId in data.required.filter { it.value != null }.keys) {
+            val item = server.registryManager.get(Registries.ITEM.key).getOrEmpty(itemId).getOrNull()
+            item?.let { costMap[it] = data.required[itemId]!! }
+        }
+    }
+
+    private val ItemStack.recipes: List<RecipeEntry<*>>
         get() = stackLookup[this.item] ?: emptyList()
 
-    val RecipeEntry<*>.result: ItemStack
-        get() = this.value.getResult(regManager)
-
-    val RecipeEntry<*>.inItemSets: List<Set<ItemStack>>
+    private val RecipeEntry<*>.inItemSets: List<Set<ItemStack>>
         get() = this.value.ingredients.map { it.matchingStacks.toSet() }
 
-
-    val stackLookup = recipeManager.values().toList().groupBy { it.value.getResult(regManager).item }
+    private val stackLookup = recipeManager.values().toList().groupBy { it.value.getResult(regManager).item }
 
     // Attempts to solve for stack cost.
     fun solveFor(stack: ItemStack, path: List<ItemStack>): Double? {
@@ -41,6 +46,10 @@ class DepthSolver(server: MinecraftServer) {
         // If no recipe exists, it is a terminator. In the future, pull from the terminator pool list. For now, return a dummy value
         if (recipes.isEmpty()) {
             terminators.add(stack.identifier)
+            // Add dependency on said item
+            for (pathItem in path) {
+                deps.getOrPut(stack.identifier) { mutableSetOf() }.add(pathItem.identifier)
+            }
             return null
         }
 
@@ -59,8 +68,10 @@ class DepthSolver(server: MinecraftServer) {
                 // Currently grabs the first solved and adds the cost; This assumes tag ingredients all have the same cost;
                 // It might be useful to average them and not just grab the first one in the future!
                 for (option in optionSet) {
-                    if (option.item in path.map { it.item }) {
-                        // Cyclic dependency!
+                    if (option.item in path.map { it.item }) { // Cyclic dependency!
+                        continue
+                    }
+                    if (path.size > 24) { // Avoid too much recursion
                         continue
                     }
                     if (option.item in costMap) { // Already calculated cost, simple O(1) lookup for worth
@@ -80,6 +91,9 @@ class DepthSolver(server: MinecraftServer) {
                 }
             }
 
+            // If a recipe makes 3 of something, the actual cost is only 1/3 as much
+            ingredientRunningCost /= recipe.value.getResult(regManager).count
+
             if (numUnsolvedIngredients > 0) {
                 //println("Could not solve for ${stack.identifier}".padStart(padding))
             } else {
@@ -90,38 +104,48 @@ class DepthSolver(server: MinecraftServer) {
 
         }
 
+        val finalCost = recipeCosts.minOrNull()
+
         // Of all calculated recipe costs, find the minimum
-        recipeCosts.minOrNull()?.let {
+        finalCost?.let {
             costMap[stack.item] = it
         }
 
-        return null
+        return finalCost
     }
 
     fun solveRequiredRecipes() {
+        var unsolved = 0
         for (item in regManager.get(Registries.ITEM.key)) {
             // If there exists a recipe for it, solve it
             if (item in stackLookup.keys) {
-                solveFor(ItemStack(item), emptyList())
+                val didSolve = solveFor(ItemStack(item), emptyList())
+                if (didSolve == null) {
+                    unsolved += 1
+                }
+            } else {
+                unsolved += 1
             }
         }
+        data.unsolved = unsolved
     }
 
-    fun emitTerminators(data: BountifulChaosData) {
+    fun syncConfig() {
         println("Terminators:")
+        // Insert terminators into required prop
         for (line in terminators.sorted()) {
-            data.required[line] = "Yes"
+            data.required[line] = costMap[regManager.get(Registries.ITEM.key).getOrEmpty(line).getOrNull()]
             println(line)
         }
+        // Reset JSON file ordering (this is a bit hacky)
+        data.required = data.required.toList().toMap().toMutableMap()
+        // Update dependency numbering
+        data.deps = deps.map { it.key to it.value.size }.sortedBy { -it.second }.toMap().toMutableMap()
     }
 
-    fun emitOptionals(data: BountifulChaosData) {
-        println("Optionals:")
-        for (stack in regManager.get(Registries.ITEM.key)) {
-            val stackId = stack.identifier
-            if (stackId !in data.required) {
-                data.optional[stackId] = "Yes"
-            }
+    fun showResults() {
+        for (item in regManager.get(Registries.ITEM.key).sortedBy { it.identifier }) {
+            println("Item: ${item.identifier.toString().padEnd(20)} - ${costMap[item]}")
         }
     }
 
