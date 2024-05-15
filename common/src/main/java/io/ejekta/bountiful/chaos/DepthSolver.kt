@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.util.Identifier
 import kotlin.jvm.optionals.getOrNull
 
-class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData) {
+class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val info: BountifulChaosInfo) {
 
     private val recipeManager: RecipeManager = server.recipeManager
     private val regManager = server.registryManager
@@ -20,12 +20,31 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData) {
 
     // Final cost map
     private val costMap = mutableMapOf<Item, Double>()
+    private val matchCosts = mutableMapOf<Item, Double>()
+
+    fun costOf(item: Item): Double? {
+        return costMap[item] ?: matchCosts[item]
+    }
 
     // Populate cost map from config
     init {
+        println("Init solve system..")
+
+        for (item in server.registryManager.get(Registries.ITEM.key)) {
+            val matchCost = data.matching.matchCost(item, server)
+            if (matchCost != null && !data.matching.isIgnored(item)) {
+                println("Adding match cost: ${item.identifier}")
+                matchCosts[item] = matchCost
+            }
+        }
+
         for (itemId in data.required.filter { it.value != null }.keys) {
             val item = server.registryManager.get(Registries.ITEM.key).getOrEmpty(itemId).getOrNull()
-            item?.let { costMap[it] = data.required[itemId]!! }
+            item?.let {
+                if (it !in matchCosts) {
+                    costMap[it] = data.required[itemId]!!
+                }
+            }
         }
     }
 
@@ -43,7 +62,7 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData) {
         //println("Solving: $stack".padStart(padding))
         val recipes = stack.recipes
 
-        // If no recipe exists, it is a terminator. In the future, pull from the terminator pool list. For now, return a dummy value
+        // If no recipe exists, it is a terminator.
         if (recipes.isEmpty()) {
             terminators.add(stack.identifier)
             // Add dependency on said item
@@ -77,6 +96,10 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData) {
                     if (option.item in costMap) { // Already calculated cost, simple O(1) lookup for worth
                         // Add the cost of the item times the amount needed (in that slot)
                         ingredientRunningCost += costMap[option.item]!! * option.count
+                        numUnsolvedIngredients -= 1
+                        break
+                    } else if (option.item in matchCosts) {
+                        ingredientRunningCost += matchCosts[option.item]!! * option.count
                         numUnsolvedIngredients -= 1
                         break
                     } else {
@@ -120,32 +143,54 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData) {
             // If there exists a recipe for it, solve it
             if (item in stackLookup.keys) {
                 val didSolve = solveFor(ItemStack(item), emptyList())
-                if (didSolve == null) {
+                if (didSolve == null && data.required[item.identifier] == null) {
                     unsolved += 1
                 }
             } else {
                 unsolved += 1
             }
         }
-        data.unsolved = unsolved
+        info.unsolved = unsolved
     }
 
     fun syncConfig() {
+
+        println("SYNCING!")
+        println("MATCH COSTS: ${matchCosts.map { it.key.identifier }}")
+
+        info.redundant = matchCosts.keys.map { it.identifier }.sorted().toMutableList()
+
+        // Remove redundant required items
+        for ((id, amt) in data.required.toList()) {
+            if (id in info.redundant) {
+                data.required.remove(id)
+            }
+        }
+
         println("Terminators:")
         // Insert terminators into required prop
-        for (line in terminators.sorted()) {
+        for (line in terminators.sorted() - info.redundant.toSet()) {
             data.required[line] = costMap[regManager.get(Registries.ITEM.key).getOrEmpty(line).getOrNull()]
             println(line)
         }
         // Reset JSON file ordering (this is a bit hacky)
-        data.required = data.required.toList().toMap().toMutableMap()
+        data.required = data.required.toList().sortedBy { it.first.toString() }.toMap().toMutableMap()
         // Update dependency numbering
-        data.deps = deps.map { it.key to it.value.size }.sortedBy { -it.second }.toMap().toMutableMap()
+        info.deps = deps.map { it.key to it.value.size }.sortedBy { -it.second }.toMap().toMutableMap()
+
+        for (item in regManager.get(Registries.ITEM.key).sortedBy { it.identifier }) {
+            if (costOf(item) == null && item.identifier !in info.redundant && !data.matching.isIgnored(item)) {
+                data.optional[item.identifier] = null
+            } else {
+                data.optional.remove(item.identifier)
+            }
+        }
+
     }
 
     fun showResults() {
         for (item in regManager.get(Registries.ITEM.key).sortedBy { it.identifier }) {
-            println("Item: ${item.identifier.toString().padEnd(20)} - ${costMap[item]}")
+            println("Item: ${item.identifier.toString().padEnd(50)} - ${costMap[item]}")
         }
     }
 

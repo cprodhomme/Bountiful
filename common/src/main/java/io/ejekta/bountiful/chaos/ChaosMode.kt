@@ -17,16 +17,22 @@ object ChaosMode {
         BountifulChaosData.serializer()
     ) { BountifulChaosData() }
 
+    private val chaosFileInfo = KambrikConfigFile(
+        rootFolder,
+        "bountiful-chaos-info.json",
+        JsonFormats.Config,
+        KambrikParseFailMode.LEAVE,
+        BountifulChaosInfo.serializer()
+    ) { BountifulChaosInfo() }
+
     var chaosData = chaosFile.read()
+    var chaosInfo = chaosFileInfo.read()
 
     fun test(server: MinecraftServer) {
         chaosData = chaosFile.read()
+        chaosInfo = chaosFileInfo.read()
 
-        println("Chaos data:")
-        println(chaosData.required)
-        println(chaosData.deps)
-
-        val solver = DepthSolver(server, chaosData)
+        val solver = DepthSolver(server, chaosData, chaosInfo)
         solver.solveRequiredRecipes()
 
         println("Done with solves!")
@@ -34,6 +40,7 @@ object ChaosMode {
         solver.syncConfig()
 
         chaosFile.write(chaosData)
+        chaosFileInfo.write(chaosInfo)
 
         solver.showResults()
     }
