@@ -1,5 +1,6 @@
 package io.ejekta.bountiful.chaos
 
+import io.ejekta.bountiful.config.BountifulChaosData
 import io.ejekta.kambrik.ext.identifier
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
@@ -7,24 +8,17 @@ import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeManager
 import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
+import net.minecraft.util.Identifier
 
 class DepthSolver(server: MinecraftServer) {
 
     private val recipeManager: RecipeManager = server.recipeManager
     private val regManager = server.registryManager
 
-    val terminators = mutableSetOf<String>()
-
-    private val recipeMap = recipeManager.values().toList().associateBy { it.id }
+    val terminators = mutableSetOf<Identifier>()
 
     // Final cost map
     val costMap = mutableMapOf<Item, Double>()
-
-    val rawDepMap = mutableMapOf<Item, MutableSet<Item>>()
-
-    fun submitFinalCost(item: Item, cost: Double) {
-        costMap[item] = cost
-    }
 
     val ItemStack.recipes: List<RecipeEntry<*>>
         get() = stackLookup[this.item] ?: emptyList()
@@ -38,8 +32,6 @@ class DepthSolver(server: MinecraftServer) {
 
     val stackLookup = recipeManager.values().toList().groupBy { it.value.getResult(regManager).item }
 
-    val recipeLookup = recipeManager.values().toList().associateBy { it.value.getResult(regManager).item }
-
     // Attempts to solve for stack cost.
     fun solveFor(stack: ItemStack, path: List<ItemStack>): Double? {
         val padding = (path.size + 1) * 2
@@ -48,7 +40,7 @@ class DepthSolver(server: MinecraftServer) {
 
         // If no recipe exists, it is a terminator. In the future, pull from the terminator pool list. For now, return a dummy value
         if (recipes.isEmpty()) {
-            terminators.add(stack.identifier.toString())
+            terminators.add(stack.identifier)
             return null
         }
 
@@ -115,10 +107,21 @@ class DepthSolver(server: MinecraftServer) {
         }
     }
 
-    fun emitTerminators() {
+    fun emitTerminators(data: BountifulChaosData) {
         println("Terminators:")
         for (line in terminators.sorted()) {
+            data.required[line] = "Yes"
             println(line)
+        }
+    }
+
+    fun emitOptionals(data: BountifulChaosData) {
+        println("Optionals:")
+        for (stack in regManager.get(Registries.ITEM.key)) {
+            val stackId = stack.identifier
+            if (stackId !in data.required) {
+                data.optional[stackId] = "Yes"
+            }
         }
     }
 
