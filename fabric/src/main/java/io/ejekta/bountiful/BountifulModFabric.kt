@@ -29,6 +29,7 @@ class BountifulModFabric : ModInitializer {
     init {
 
         ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(BountifulReloadListener)
+        val ourContainer = FabricLoader.getInstance().getModContainer(Bountiful.ID).get()
 
         listOf(
             "campanion",
@@ -40,7 +41,6 @@ class BountifulModFabric : ModInitializer {
             "xtraarrows",
             "numismatic-overhaul"
         ).forEach {
-            val ourContainer = FabricLoader.getInstance().getModContainer(Bountiful.ID).get()
             if (FabricLoader.getInstance().isModLoaded(it)) {
                 val modContainer = FabricLoader.getInstance().getModContainer(it).get()
                 ResourceManagerHelper.registerBuiltinResourcePack(
