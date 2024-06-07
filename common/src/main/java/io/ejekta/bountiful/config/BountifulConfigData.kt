@@ -50,6 +50,13 @@ class BountifulConfigData {
         )
     }
 
+    @Serializable
+    class ChaosConfigData {
+        var enabled = false
+    }
+
+    val chaos = ChaosConfigData()
+
     val general = GeneralConfigData()
 
     fun buildScreen(): Screen {
@@ -217,6 +224,19 @@ class BountifulConfigData {
                 Text.literal("Whether advanced tooltips should show debug information")
             ).setSaveConsumer {
                 client.advancedDebugTooltips = it
+            }.build()
+        )
+
+        val chaosCat = builder.getOrCreateCategory(Text.literal("Chaos Mode"))
+
+        chaosCat.addEntry(
+            creator.startBooleanToggle(
+                Text.literal("Enable Chaos Mode (Experimental)"),
+                chaos.enabled
+            ).setDefaultValue(false).setTooltip(
+                Text.literal("Whether chaos mode is enabled. Will override all base and config data.")
+            ).setSaveConsumer {
+                chaos.enabled = it
             }.build()
         )
 

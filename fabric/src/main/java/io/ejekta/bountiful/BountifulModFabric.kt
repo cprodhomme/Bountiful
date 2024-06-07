@@ -1,6 +1,7 @@
 package io.ejekta.bountiful
 
 import io.ejekta.bountiful.bridge.Bountybridge
+import io.ejekta.bountiful.chaos.ChaosMode
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.BountifulReloadListener
 import io.ejekta.bountiful.content.BountifulCommands
@@ -73,6 +74,12 @@ class BountifulModFabric : ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTING.register(ServerLifecycleEvents.ServerStarting { server ->
             Bountybridge.registerJigsawPieces(server)
+        })
+
+        ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { server ->
+            if (BountifulIO.configData.chaos.enabled) {
+                ChaosMode.inject(server)
+            }
         })
 
         // Increment entity bounties for all players within 12 blocks of the player and all players within 12 blocks of the mob

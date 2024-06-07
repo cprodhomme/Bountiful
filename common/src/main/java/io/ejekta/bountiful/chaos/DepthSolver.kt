@@ -1,13 +1,21 @@
 package io.ejekta.bountiful.chaos
 
+import io.ejekta.bountiful.bounty.BountyRarity
+import io.ejekta.bountiful.content.BountifulContent
+import io.ejekta.bountiful.data.Decree
+import io.ejekta.bountiful.data.Pool
+import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.kambrik.ext.identifier
 import net.minecraft.item.Item
+import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeManager
 import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.Identifier
+import net.minecraft.util.Rarity
+import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val info: BountifulChaosInfo) {
@@ -58,8 +66,6 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
 
     // Attempts to solve for stack cost.
     fun solveFor(stack: ItemStack, path: List<ItemStack>): Double? {
-        val padding = (path.size + 1) * 2
-        //println("Solving: $stack".padStart(padding))
         val recipes = stack.recipes
 
         // If no recipe exists, it is a terminator.
@@ -87,19 +93,14 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
                 // Currently grabs the first solved and adds the cost; This assumes tag ingredients all have the same cost;
                 // It might be useful to average them and not just grab the first one in the future!
                 for (option in optionSet) {
-                    if (option.item in path.map { it.item }) { // Cyclic dependency!
+                    if (option.item in path.map { it.item } || path.size > 24) { // Cyclic dependency or too much recursion!
                         continue
                     }
-                    if (path.size > 24) { // Avoid too much recursion
-                        continue
-                    }
-                    if (option.item in costMap) { // Already calculated cost, simple O(1) lookup for worth
+
+                    val itemCost = costOf(option.item) // Check for already calculated cost, simple O(1) lookup for worth
+                    if (itemCost != null) {
                         // Add the cost of the item times the amount needed (in that slot)
-                        ingredientRunningCost += costMap[option.item]!! * option.count
-                        numUnsolvedIngredients -= 1
-                        break
-                    } else if (option.item in matchCosts) {
-                        ingredientRunningCost += matchCosts[option.item]!! * option.count
+                        ingredientRunningCost += itemCost * option.count
                         numUnsolvedIngredients -= 1
                         break
                     } else {
@@ -190,8 +191,55 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
 
     fun showResults() {
         for (item in regManager.get(Registries.ITEM.key).sortedBy { it.identifier }) {
-            println("Item: ${item.identifier.toString().padEnd(50)} - ${costMap[item]}")
+            println("Item: ${item.identifier.toString().padEnd(50)} - ${costOf(item)}")
         }
     }
+
+    fun sendToRegistries() {
+        println("Sending to registries..")
+
+
+        BountifulContent.Pools.clear()
+        BountifulContent.Decrees.clear()
+
+        val poolId = "chaos"
+        val pool = Pool(poolId)
+
+        for (item in regManager.get(Registries.ITEM.key).sortedBy { it.identifier }) {
+            println("Item: ${item.identifier.toString().padEnd(50)} - ${costOf(item)}")
+            val realCost = costOf(item) ?: continue
+            val stack = ItemStack(item)
+            val realAmtMax = stack.maxCount
+            var realRarity = when (stack.rarity) {
+                Rarity.UNCOMMON -> BountyRarity.RARE
+                Rarity.RARE -> BountyRarity.EPIC
+                Rarity.EPIC -> BountyRarity.LEGENDARY
+                else -> BountyRarity.COMMON
+            }
+
+            if (stack.rarity == Rarity.COMMON && stack.maxCount == 1) {
+                realRarity = BountyRarity.UNCOMMON
+            }
+
+            val poolEntry = PoolEntry.create().apply {
+                content = stack.identifier.toString()
+                amount = PoolEntry.EntryRange(1, realAmtMax)
+                unitWorth = realCost
+                rarity = realRarity
+                id = UUID.randomUUID().toString()
+            }
+
+            pool.items.add(poolEntry)
+        }
+
+        pool.setup(poolId)
+
+        val decree = Decree(poolId, mutableSetOf(poolId), mutableSetOf(poolId))
+        BountifulContent.Decrees.add(decree)
+        BountifulContent.Pools.add(pool)
+
+    }
+
+
 
 }

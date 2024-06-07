@@ -1,5 +1,6 @@
 package io.ejekta.bountiful.chaos
 
+import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.config.BountifulIO.rootFolder
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.kambrikx.file.KambrikConfigFile
@@ -43,6 +44,26 @@ object ChaosMode {
         chaosFileInfo.write(chaosInfo)
 
         solver.showResults()
+    }
+
+    fun inject(server: MinecraftServer) {
+        Bountiful.LOGGER.info("Injecting chaos into Bountiful...")
+        chaosData = chaosFile.read()
+        chaosInfo = chaosFileInfo.read()
+
+        val solver = DepthSolver(server, chaosData, chaosInfo)
+        solver.solveRequiredRecipes()
+
+        println("Done with solves!")
+
+        solver.syncConfig()
+
+        chaosFile.write(chaosData)
+        chaosFileInfo.write(chaosInfo)
+
+        solver.sendToRegistries()
+
+        Bountiful.LOGGER.info("Chaos sent!")
     }
 
 }
