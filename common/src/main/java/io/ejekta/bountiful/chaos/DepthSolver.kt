@@ -1,5 +1,6 @@
 package io.ejekta.bountiful.chaos
 
+import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.data.Decree
@@ -7,7 +8,6 @@ import io.ejekta.bountiful.data.Pool
 import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.kambrik.ext.identifier
 import net.minecraft.item.Item
-import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.RecipeEntry
 import net.minecraft.recipe.RecipeManager
@@ -15,7 +15,7 @@ import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.Identifier
 import net.minecraft.util.Rarity
-import java.util.UUID
+import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
 class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val info: BountifulChaosInfo) {
@@ -36,12 +36,12 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
 
     // Populate cost map from config
     init {
-        println("Init solve system..")
+        Bountiful.LOGGER.debug("Init solve system..")
 
         for (item in server.registryManager.get(Registries.ITEM.key)) {
             val matchCost = data.matching.matchCost(item, server)
             if (matchCost != null && !data.matching.isIgnored(item)) {
-                println("Adding match cost: ${item.identifier}")
+                Bountiful.LOGGER.debug("Adding match cost: ${item.identifier}")
                 matchCosts[item] = matchCost
             }
         }
@@ -156,8 +156,7 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
 
     fun syncConfig() {
 
-        println("SYNCING!")
-        println("MATCH COSTS: ${matchCosts.map { it.key.identifier }}")
+        Bountiful.LOGGER.debug("Syncing Chaos Config...")
 
         info.redundant = matchCosts.keys.map { it.identifier }.sorted().toMutableList()
 
@@ -168,11 +167,11 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
             }
         }
 
-        println("Terminators:")
+        Bountiful.LOGGER.debug("Terminators:")
         // Insert terminators into required prop
         for (line in terminators.sorted() - info.redundant.toSet()) {
             data.required[line] = costMap[regManager.get(Registries.ITEM.key).getOrEmpty(line).getOrNull()]
-            println(line)
+            Bountiful.LOGGER.debug(line)
         }
         // Reset JSON file ordering (this is a bit hacky)
         data.required = data.required.toList().sortedBy { it.first.toString() }.toMap().toMutableMap()
@@ -189,15 +188,8 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
 
     }
 
-    fun showResults() {
-        for (item in regManager.get(Registries.ITEM.key).sortedBy { it.identifier }) {
-            println("Item: ${item.identifier.toString().padEnd(50)} - ${costOf(item)}")
-        }
-    }
-
     fun sendToRegistries() {
-        println("Sending to registries..")
-
+        Bountiful.LOGGER.debug("Sending chaos data to Bountiful registries..")
 
         BountifulContent.Pools.clear()
         BountifulContent.Decrees.clear()
@@ -237,9 +229,6 @@ class DepthSolver(val server: MinecraftServer, val data: BountifulChaosData, val
         val decree = Decree(poolId, mutableSetOf(poolId), mutableSetOf(poolId))
         BountifulContent.Decrees.add(decree)
         BountifulContent.Pools.add(pool)
-
     }
-
-
 
 }
