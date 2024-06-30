@@ -1,8 +1,10 @@
 package io.ejekta.bountiful.config
 
+import io.ejekta.bountiful.chaos.ChaosMode
 import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.kambrik.text.textLiteral
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import me.shedaniel.clothconfig2.api.ConfigBuilder
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.Screen
@@ -56,6 +58,10 @@ class BountifulConfigData {
     }
 
     val chaos = ChaosConfigData()
+
+    @Transient var chaosMode: ChaosMode? = if (chaos.enabled) {
+        ChaosMode()
+    } else null
 
     val general = GeneralConfigData()
 
@@ -237,6 +243,11 @@ class BountifulConfigData {
                 Text.literal("Whether chaos mode is enabled. Will override all base and config data.")
             ).setSaveConsumer {
                 chaos.enabled = it
+                chaosMode = if (it) {
+                    chaosMode ?: ChaosMode()
+                } else {
+                    null
+                }
             }.build()
         )
 

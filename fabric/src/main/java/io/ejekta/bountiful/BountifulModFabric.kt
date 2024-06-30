@@ -76,10 +76,9 @@ class BountifulModFabric : ModInitializer {
             Bountybridge.registerJigsawPieces(server)
         })
 
+        // Experimental.. (Fabric Only)
         ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { server ->
-            if (BountifulIO.configData.chaos.enabled) {
-                ChaosMode.inject(server)
-            }
+            BountifulIO.configData.chaosMode?.inject(server)
         })
 
         // Increment entity bounties for all players within 12 blocks of the player and all players within 12 blocks of the mob

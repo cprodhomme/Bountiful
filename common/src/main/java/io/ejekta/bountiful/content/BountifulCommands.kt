@@ -159,16 +159,6 @@ object BountifulCommands {
                         }
                     }
 
-                    "chaos" {
-                        "test" runs {
-                            try {
-                                ChaosMode.test(source.server)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
-                    }
-
                     "dump" runs dumpData()
 
                     "dev" {

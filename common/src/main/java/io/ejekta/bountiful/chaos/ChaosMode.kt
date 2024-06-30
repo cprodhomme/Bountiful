@@ -7,8 +7,7 @@ import io.ejekta.kambrikx.file.KambrikConfigFile
 import io.ejekta.kambrikx.file.KambrikParseFailMode
 import net.minecraft.server.MinecraftServer
 
-object ChaosMode {
-
+class ChaosMode {
 
     private val chaosFile = KambrikConfigFile(
         rootFolder,
@@ -26,25 +25,8 @@ object ChaosMode {
         BountifulChaosInfo.serializer()
     ) { BountifulChaosInfo() }
 
-    var chaosData = chaosFile.read()
-    var chaosInfo = chaosFileInfo.read()
-
-    fun test(server: MinecraftServer) {
-        chaosData = chaosFile.read()
-        chaosInfo = chaosFileInfo.read()
-
-        val solver = DepthSolver(server, chaosData, chaosInfo)
-        solver.solveRequiredRecipes()
-
-        println("Done with solves!")
-
-        solver.syncConfig()
-
-        chaosFile.write(chaosData)
-        chaosFileInfo.write(chaosInfo)
-
-        solver.showResults()
-    }
+    private var chaosData = chaosFile.read()
+    private var chaosInfo = chaosFileInfo.read()
 
     fun inject(server: MinecraftServer) {
         Bountiful.LOGGER.info("Injecting chaos into Bountiful...")
@@ -54,7 +36,7 @@ object ChaosMode {
         val solver = DepthSolver(server, chaosData, chaosInfo)
         solver.solveRequiredRecipes()
 
-        println("Done with solves!")
+        Bountiful.LOGGER.info("Done with solves!")
 
         solver.syncConfig()
 
@@ -65,5 +47,4 @@ object ChaosMode {
 
         Bountiful.LOGGER.info("Chaos sent!")
     }
-
 }
