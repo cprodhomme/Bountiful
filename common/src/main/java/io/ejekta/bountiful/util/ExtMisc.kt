@@ -5,7 +5,6 @@ import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.gui.BoardScreenHandler
 import io.ejekta.bountiful.content.item.BountyItem
-import io.ejekta.kambrik.message.ClientMsg
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.ai.brain.Brain
 import net.minecraft.entity.ai.brain.MemoryModuleType

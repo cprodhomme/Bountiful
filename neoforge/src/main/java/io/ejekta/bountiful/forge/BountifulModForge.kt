@@ -98,7 +98,7 @@ class BountifulModForge {
         fun registerRegistryContent(evt: RegisterEvent) {
             KambrikRegistrar[BountifulContent].content.forEach { entry ->
                 evt.register(entry.registry.key as RegistryKey<out Registry<Any>>) {
-                    it.register(Identifier(BountifulContent.getId(), entry.itemId), entry.item.value!!)
+                    it.register(Identifier.of(BountifulContent.getId(), entry.itemId), entry.item.value!!)
                 }
             }
         }

@@ -21,11 +21,11 @@ import net.minecraft.util.Identifier
 
 class BountyTypeEntity : IBountyObjective {
 
-    override val id: Identifier = Identifier("entity")
+    override val id: Identifier = Identifier.of("entity")
 
     override fun isValid(entry: PoolEntry, server: MinecraftServer): Boolean {
-        val id = getEntityType(Identifier(entry.content)).identifier
-        return id == Identifier(entry.content)
+        val id = getEntityType(Identifier.of(entry.content)).identifier
+        return id == Identifier.of(entry.content)
     }
 
     override fun textSummary(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity): MutableText {
@@ -72,7 +72,7 @@ class BountyTypeEntity : IBountyObjective {
 
     companion object {
         fun getEntityType(entry: BountyDataEntry): EntityType<*> {
-            return getEntityType(Identifier(entry.content))
+            return getEntityType(Identifier.of(entry.content))
         }
 
         fun getEntityType(id: Identifier): EntityType<*> {

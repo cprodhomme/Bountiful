@@ -10,7 +10,6 @@ import io.ejekta.kambrik.bridge.Kambridge
 import io.ejekta.kambrik.ext.collect
 import io.ejekta.kambrik.ext.identifier
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.item.TooltipContext
 import net.minecraft.enchantment.EnchantmentHelper
 import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -28,16 +27,16 @@ import kotlin.jvm.optionals.getOrNull
 
 class BountyTypeItem : IBountyExchangeable {
 
-    override val id: Identifier = Identifier("item")
+    override val id: Identifier = Identifier.of("item")
 
     override fun isValid(entry: PoolEntry, server: MinecraftServer): Boolean {
         return if (entry.content.startsWith("#")) {
             getTagItems(server.registryManager, getTagItemKey(
-                Identifier(entry.content.substringAfter("#"))
+                Identifier.of(entry.content.substringAfter("#"))
             )).isNotEmpty()
         } else {
-            val id = getItem(Identifier(entry.content)).identifier
-            id == Identifier(entry.content)
+            val id = getItem(Identifier.of(entry.content)).identifier
+            id == Identifier.of(entry.content)
         }
     }
 
@@ -99,7 +98,7 @@ class BountyTypeItem : IBountyExchangeable {
 
     companion object {
         fun getItem(entry: BountyDataEntry): Item {
-            return getItem(Identifier(entry.content))
+            return getItem(Identifier.of(entry.content))
         }
 
         fun getItem(id: Identifier): Item {

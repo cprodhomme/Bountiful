@@ -5,7 +5,6 @@ import io.ejekta.bountiful.bounty.BountyInfo
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.config.BountifulIO
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.server.world.ServerWorld

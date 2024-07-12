@@ -45,7 +45,7 @@ class BountifulModFabric : ModInitializer {
             if (FabricLoader.getInstance().isModLoaded(it)) {
                 val modContainer = FabricLoader.getInstance().getModContainer(it).get()
                 ResourceManagerHelper.registerBuiltinResourcePack(
-                    Identifier(Bountiful.ID, "compat-$it"),
+                    Identifier.of(Bountiful.ID, "compat-$it"),
                     ourContainer,
                     Text.literal("${ourContainer.metadata.name} - ${modContainer.metadata.name} Compat"),
                     ResourcePackActivationType.DEFAULT_ENABLED

@@ -142,9 +142,9 @@ class BoardScreen(handler: ScreenHandler, inventory: PlayerInventory, title: Tex
     companion object {
         private val TEXTURE = Bountiful.id("board_bg")
         private val SELECTOR = Bountiful.id("selector")
-        private val SCROLLER = Identifier("container/villager/scroller")
-        private val XP_FG = Identifier("container/villager/experience_bar_current")
-        private val XP_BG = Identifier("container/villager/experience_bar_background")
+        private val SCROLLER = Identifier.of("container/villager/scroller")
+        private val XP_FG = Identifier.of("container/villager/experience_bar_current")
+        private val XP_BG = Identifier.of("container/villager/experience_bar_background")
     }
 }
 

@@ -14,42 +14,42 @@ dependencyResolutionManagement {
         create("libs") {
 
             val Plugins = object {
-                val Architectury = "3.4.151" //=> https://maven.architectury.dev/architectury-plugin/architectury-plugin.gradle.plugin/
-                val ArchLoom = "1.5-SNAPSHOT" //=> https://maven.architectury.dev/dev/architectury/architectury-loom/
+                val Architectury = "3.4.155" //=> https://maven.architectury.dev/architectury-plugin/architectury-plugin.gradle.plugin/
+                val ArchLoom = "1.7-SNAPSHOT" //=> https://maven.architectury.dev/dev/architectury/architectury-loom/
                 val Shadow = "7.1.2"
             }
 
             val Platform = object {
-                val MC = "1.20.4"
+                val MC = "1.21"
                 // https://fabricmc.net/develop/
-                val Yarn = "build.3"
-                val FabricLoader = "0.15.3"
-                val FabricApi = "0.93.1"
-                val NeoForge = "20.4.114-beta" //=> https://projects.neoforged.net/neoforged/neoforge
+                val Yarn = "build.9"
+                val FabricLoader = "0.16.0"
+                val FabricApi = "0.100.4"
+                val NeoForge = "21.0.86-beta" //=> https://projects.neoforged.net/neoforged/neoforge
             }
 
             val Ejekta = object {
-                val Kambrik = "7.0.0"
+                val Kambrik = "8.0.0"
                 val KambrikSnapshot = true
             }
 
             val Kotlin = object {
-                val Version = "1.9.22" // => https://kotlinlang.org/docs/releases.html
-                val Serialization = "1.6.2" // => https://github.com/Kotlin/kotlinx.serialization/releases
-                val FabricAdapter = "1.10.17" // => https://modrinth.com/mod/fabric-language-kotlin/versions
-                val ForgeAdapter = "4.10.0" // => https://modrinth.com/mod/kotlin-for-forge/versions
+                val Version = "2.0.0" // => https://kotlinlang.org/docs/releases.html
+                val Serialization = "1.6.0" // => https://github.com/Kotlin/kotlinx.serialization/releases
+                val FabricAdapter = "1.11.0" // => https://modrinth.com/mod/fabric-language-kotlin/versions
+                val ForgeAdapter = "5.3.0" //=> https://modrinth.com/mod/kotlin-for-forge/versions
             }
 
             val Mods = object {
-                val Cloth = "13.0.121" // => https://modrinth.com/mod/cloth-config/versions
-                val ModMenu = "9.0.0" // => https://modrinth.com/mod/modmenu/versions
+                val Cloth = "15.0.127" // => https://modrinth.com/mod/cloth-config/versions
+                val ModMenu = "11.0.1" // => https://modrinth.com/mod/modmenu/versions
             }
 
             // Versions
 
             val ejektaGroup = "io.ejekta"
             val modPackage = "bountiful"
-            val modVersion = "7.0.3"
+            val modVersion = "8.0.0"
 
             version("org", ejektaGroup)
             version("pkg", "$ejektaGroup.$modPackage")
@@ -128,5 +128,6 @@ dependencyResolutionManagement {
     }
 }
 
-include("common", "fabric", "neoforge", "datagen")
+// TODO re-add neoforge
+include("common", "fabric", "datagen")
 

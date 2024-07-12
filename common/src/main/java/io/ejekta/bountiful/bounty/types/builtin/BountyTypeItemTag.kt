@@ -22,14 +22,14 @@ import net.minecraft.world.World
 
 class BountyTypeItemTag : IBountyExchangeable {
 
-    override val id: Identifier = Identifier("item_tag")
+    override val id: Identifier = Identifier.of("item_tag")
 
     private fun entryAppliesToStack(entry: BountyDataEntry, stack: ItemStack): Boolean {
-        return stack.isIn(TagKey.of(Registries.ITEM.key, Identifier(entry.content)))
+        return stack.isIn(TagKey.of(Registries.ITEM.key, Identifier.of(entry.content)))
     }
 
     override fun isValid(entry: PoolEntry, server: MinecraftServer): Boolean {
-        return getTagItems(server.registryManager, getTagItemKey(Identifier(entry.content))).isNotEmpty()
+        return getTagItems(server.registryManager, getTagItemKey(Identifier.of(entry.content))).isNotEmpty()
     }
 
     private fun getCurrentStacks(entry: BountyDataEntry, player: PlayerEntity): Map<ItemStack, Int>? {
@@ -80,7 +80,7 @@ class BountyTypeItemTag : IBountyExchangeable {
     }
 
     companion object {
-        private fun getTag(entry: BountyDataEntry) = TagKey.of(Registries.ITEM.key, Identifier(entry.content))
+        private fun getTag(entry: BountyDataEntry) = TagKey.of(Registries.ITEM.key, Identifier.of(entry.content))
 
 
         fun getItems(world: World, entry: BountyDataEntry): List<Item> {

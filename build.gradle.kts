@@ -48,8 +48,8 @@ subprojects {
     apply(plugin = "architectury-plugin")
 
     extensions.configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     group = rootProject.group
@@ -67,10 +67,10 @@ subprojects {
     tasks {
         withType<JavaCompile> {
             options.encoding = "UTF-8"
-            options.release.set(17)
+            options.release.set(21)
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "17"
+            kotlinOptions.jvmTarget = "21"
             kotlinOptions.freeCompilerArgs = listOf("-Xlambdas=indy", "-Xjvm-default=all",)
         }
     }
@@ -98,7 +98,7 @@ subprojects {
 
         tasks.withType<JavaCompile> {
             options.encoding = "UTF-8"
-            options.release.set(17)
+            options.release.set(21)
         }
 
         tasks {
@@ -127,5 +127,5 @@ repositories {
     mavenCentral()
 }
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(21)
 }

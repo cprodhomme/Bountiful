@@ -96,9 +96,9 @@ interface BountifulSharedApi {
             Bountiful.LOGGER.info("Registering Bounty Board Jigsaw Piece for Village Type: $villageType")
             Kambrik.Structure.addToStructurePool(
                 server,
-                Identifier("bountiful:village/common/bounty_gazebo"),
-                Identifier("minecraft:village/$villageType/houses"),
-                Identifier("bountiful:$villageType"),
+                Identifier.of("bountiful:village/common/bounty_gazebo"),
+                Identifier.of("minecraft:village/$villageType/houses"),
+                Identifier.of("bountiful:$villageType"),
                 BountifulIO.configData.board.villageGenFrequency
             )
         }

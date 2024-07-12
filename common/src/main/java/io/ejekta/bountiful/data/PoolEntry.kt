@@ -29,7 +29,7 @@ import kotlin.math.min
 
 @Serializable
 class PoolEntry private constructor() {
-    var type: @Contextual Identifier = Identifier(Bountiful.ID, "null_pool")
+    var type: @Contextual Identifier = Identifier.of(Bountiful.ID, "null_pool")
     var rarity = BountyRarity.COMMON
     var content = "Nope"
     var name: String? = null
@@ -83,11 +83,11 @@ class PoolEntry private constructor() {
     private fun getRelatedItems(world: ServerWorld): List<Item>? {
         return when (type) {
             BountyTypeRegistry.ITEM.id -> {
-                val tagId = Identifier(content.substringAfter("#"))
+                val tagId = Identifier.of(content.substringAfter("#"))
                 getTagItems(world.registryManager, getTagItemKey(tagId))
             }
             BountyTypeRegistry.ITEM_TAG.id -> {
-                val tagId = Identifier(content)
+                val tagId = Identifier.of(content)
                 getTagItems(world.registryManager, getTagItemKey(tagId))
             }
             else -> null
@@ -98,7 +98,7 @@ class PoolEntry private constructor() {
         val amt = amountAt(worth)
 
         val actualContent = if (type == BountyTypeRegistry.ITEM.id && content.startsWith("#")) {
-            val tagId = Identifier(content.substringAfter("#"))
+            val tagId = Identifier.of(content.substringAfter("#"))
             val items = getTagItems(world.registryManager, getTagItemKey(tagId))
             if (items.isEmpty()){
                 Bountiful.LOGGER.warn("A pool entry tag has an empty list! $content")

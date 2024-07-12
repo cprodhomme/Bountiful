@@ -5,7 +5,6 @@ import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.bounty.types.IBountyReward
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.messages.OnBountyComplete
-import io.ejekta.kambrik.serial.ItemDataJson
 import kotlinx.serialization.Serializable
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack

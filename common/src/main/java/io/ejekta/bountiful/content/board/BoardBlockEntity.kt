@@ -71,7 +71,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
     private var lastUpdatedTime = serverWorld?.time ?: 0L
 
     // Only need to calc this once per object, I don't see it changing often
-    private val villageTag = Registries.POINT_OF_INTEREST_TYPE.streamTags().filter { it.id == Identifier("village") }.findFirst().getOrNull()
+    private val villageTag = Registries.POINT_OF_INTEREST_TYPE.streamTags().filter { it.id == Identifier.of("village") }.findFirst().getOrNull()
 
     fun maskFor(player: PlayerEntity): MutableSet<Int> {
         return takenMask.getOrPut(player.uuidAsString) { mutableSetOf() }

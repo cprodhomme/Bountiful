@@ -150,7 +150,7 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
     }
 
     companion object {
-        val BUTTON = Identifier("widget/button")
+        val BUTTON = Identifier.of("widget/button")
         val ARROW = Bountiful.id("arrow")
 
         const val ButtonWidth = 160

@@ -46,8 +46,6 @@ class AnalyzerScreen(handler: ScreenHandler, inventory: PlayerInventory, title: 
         img(TEXTURE, backgroundWidth, backgroundHeight)
     }
 
-    // TODO make a class for this that caches and displays data for one pool only!
-
     val dec = BountifulContent.Decrees.find { it.id == "fletcher" }!!
 
     private val overallMaxWorth = dec.rewardPools.maxOf { pool ->
@@ -175,9 +173,9 @@ class AnalyzerScreen(handler: ScreenHandler, inventory: PlayerInventory, title: 
         private val TEXTURE = Bountiful.id("analyzer_bg")
         private val SCROLLER = Bountiful.id("analyzer_scroller")
 //        private val SELECTOR = Bountiful.id("selector")
-//        private val SCROLLER = Identifier("container/villager/scroller")
-//        private val XP_FG = Identifier("container/villager/experience_bar_current")
-//        private val XP_BG = Identifier("container/villager/experience_bar_background")
+//        private val SCROLLER = Identifier.of("container/villager/scroller")
+//        private val XP_FG = Identifier.of("container/villager/experience_bar_current")
+//        private val XP_BG = Identifier.of("container/villager/experience_bar_background")
     }
 }
 

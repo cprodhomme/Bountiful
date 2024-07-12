@@ -13,7 +13,7 @@ import kotlin.random.Random
 
 class BountyTypeCommand : IBountyReward {
 
-    override val id: Identifier = Identifier("command")
+    override val id: Identifier = Identifier.of("command")
 
     override fun isValid(entry: PoolEntry, server: MinecraftServer): Boolean {
         val parsed = server.commandManager.dispatcher.parse(entry.content, server.commandSource)

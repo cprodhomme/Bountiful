@@ -6,7 +6,6 @@ import io.ejekta.bountiful.util.GameTime
 import io.ejekta.kambrik.serial.ItemDataJson
 import kotlinx.serialization.Serializable
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.item.TooltipContext
 import net.minecraft.item.ItemStack
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
