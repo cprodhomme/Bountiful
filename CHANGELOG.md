@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project loosely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [7.0.3] for 1.20.4 - Unreleased
+## [7.0.3] for 1.20.4 - 2024-06-30
 
 ### Added
 - Added a %RANDOM_INT(1, 4)% preprocessor value for commands - this will be replaced with a number between 1 and 4, for example.
@@ -14,7 +14,7 @@ and this project loosely adheres to [Semantic Versioning](https://semver.org/spe
 
 ### Fixed
 - Fixed a rare crash where a villager would forget where the bounty board is located.
-- TODO: Fix items being voided if the player closes their inventory with a stack attached to their cursor.
+- Fixed items being voided if the player closes their inventory with a stack attached to their cursor.
 
 ## [7.0.2] for 1.20.4 - 2024-03-04
 
