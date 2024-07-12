@@ -1,6 +1,7 @@
 package io.ejekta.bountiful
 
 import io.ejekta.bountiful.bridge.Bountybridge
+import io.ejekta.bountiful.chaos.ChaosMode
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.BountifulReloadListener
 import io.ejekta.bountiful.content.BountifulCommands
@@ -29,6 +30,7 @@ class BountifulModFabric : ModInitializer {
     init {
 
         ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(BountifulReloadListener)
+        val ourContainer = FabricLoader.getInstance().getModContainer(Bountiful.ID).get()
 
         listOf(
             "campanion",
@@ -40,7 +42,6 @@ class BountifulModFabric : ModInitializer {
             "xtraarrows",
             "numismatic-overhaul"
         ).forEach {
-            val ourContainer = FabricLoader.getInstance().getModContainer(Bountiful.ID).get()
             if (FabricLoader.getInstance().isModLoaded(it)) {
                 val modContainer = FabricLoader.getInstance().getModContainer(it).get()
                 ResourceManagerHelper.registerBuiltinResourcePack(
@@ -73,6 +74,11 @@ class BountifulModFabric : ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTING.register(ServerLifecycleEvents.ServerStarting { server ->
             Bountybridge.registerJigsawPieces(server)
+        })
+
+        // Experimental.. (Fabric Only)
+        ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted { server ->
+            BountifulIO.configData.chaosMode?.inject(server)
         })
 
         // Increment entity bounties for all players within 12 blocks of the player and all players within 12 blocks of the mob

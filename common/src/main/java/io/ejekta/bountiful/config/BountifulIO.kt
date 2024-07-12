@@ -22,7 +22,7 @@ import kotlin.math.min
 
 object BountifulIO {
 
-    private val rootFolder = Kambrik.File.getConfigFolderRelativePath(Bountiful.ID)
+    val rootFolder = Kambrik.File.getConfigFolderRelativePath(Bountiful.ID)
 
     private val configFile = KambrikConfigFile(
         rootFolder,
