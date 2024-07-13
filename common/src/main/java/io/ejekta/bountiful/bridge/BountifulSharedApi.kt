@@ -72,11 +72,7 @@ interface BountifulSharedApi {
             Bountiful.id("clipboard_copy")
         )
 
-        Kambrik.Message.registerClientMessage(
-            OnBountyComplete.serializer(),
-            OnBountyComplete::class,
-            Bountiful.id("play_sound_on_client")
-        )
+        Kambrik.Message.registerClientMessage(OnBountyComplete.serializer(), OnBountyComplete.ID)
 
         Kambrik.Message.registerClientMessage(
             UpdateBountyCriteriaObjective.serializer(),

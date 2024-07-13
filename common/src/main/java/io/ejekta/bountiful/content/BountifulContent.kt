@@ -1,8 +1,11 @@
 package io.ejekta.bountiful.content
 
 import com.mojang.serialization.Codec
-import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.advancement.SimpleCriterion
+import io.ejekta.bountiful.bounty.DecreeData
+import io.ejekta.bountiful.components.BountyEntries
+import io.ejekta.bountiful.components.BountyInfo
+import io.ejekta.bountiful.components.BountyPing
 import io.ejekta.bountiful.content.board.BoardBlock
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.gui.AnalyzerScreenHandler
@@ -12,24 +15,13 @@ import io.ejekta.bountiful.content.item.DecreeItem
 import io.ejekta.bountiful.data.Decree
 import io.ejekta.bountiful.data.Pool
 import io.ejekta.kambrik.registration.KambrikAutoRegistrar
-import net.minecraft.block.BlockState
 import net.minecraft.entity.ai.brain.MemoryModuleType
-import net.minecraft.entity.passive.VillagerEntity
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
-import net.minecraft.registry.RegistryKey
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.registry.entry.RegistryEntry
-import net.minecraft.stat.Stat
 import net.minecraft.stat.StatFormatter
-import net.minecraft.stat.Stats
 import net.minecraft.util.math.GlobalPos
-import net.minecraft.world.poi.PointOfInterestType
-import net.minecraft.world.poi.PointOfInterestTypes
 import java.util.*
-import java.util.function.BiPredicate
 
 object BountifulContent : KambrikAutoRegistrar {
 
@@ -66,6 +58,12 @@ object BountifulContent : KambrikAutoRegistrar {
     val MEM_MODULE_NEAREST_BOARD by MEM_MODULE_NEAREST_BOARD_INSTANCE
 
     //val POI_BOUNTY_BOARD = "bountyboard".forVillagerPoi(MEM_MODULE_NEAREST_BOARD_INSTANCE, setOf(BOARD.value.defaultState), 1, 1)
+
+    val BOUNTY_INFO by "bounty_info".forComponent(BountyInfo.serializer())
+    val BOUNTY_PING by "bounty_ping".forComponent(BountyPing.serializer())
+    val BOUNTY_OBJS by "objects".forComponent(BountyEntries.serializer())
+    val BOUNTY_REWS by "rewards".forComponent(BountyEntries.serializer())
+    val DECREE_DATA by "decree_data".forComponent(DecreeData.serializer())
 
     object CustomStats {
         private val simpleFormat = StatFormatter { "$it" }

@@ -18,21 +18,20 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 
 // Tracks the status of a given bounty
-@Serializable
-data class BountyDataEntry private constructor(
+@Serializable @JvmRecord
+data class BountyDataEntry constructor(
     val id: String,
     val logicId: @Contextual Identifier,
     val content: String,
     val amount: Int,
-    var nbt: @Contextual NbtCompound? = null,
-    var name: String? = null,
-    var icon: @Contextual Identifier? = null,
-    var isMystery: Boolean = false,
-    var rarity: BountyRarity = BountyRarity.COMMON,
-    var tracking: JsonObject = JsonObject(emptyMap()), // Used to track extra data, e.g. current progress if needed
-    var critConditions: JsonObject? = null,
-    var current: Int = 0, // Current progress
-    var relatedDecreeIds: Set<String> = emptySet()
+    val nbt: @Contextual NbtCompound? = null,
+    val name: String? = null,
+    val icon: @Contextual Identifier? = null,
+    val isMystery: Boolean = false,
+    val rarity: BountyRarity = BountyRarity.COMMON,
+    val tracking: JsonObject = JsonObject(emptyMap()), // Used to track extra data, e.g. current progress if needed
+    val critConditions: JsonObject? = null,
+    val relatedDecreeIds: Set<String> = emptySet()
 ) {
 
     private fun getRelatedDecrees(): Set<Decree> {
@@ -49,9 +48,6 @@ data class BountyDataEntry private constructor(
     val logic: IBountyType
         get() = BountyTypeRegistry[logicId]!!
 
-    @Transient
-    var worth = Double.MIN_VALUE
-
     override fun toString(): String {
         return "BDE[type=$logic, content=$content, amount=$amount, isNbtNull=${nbt == null}, name=$name, mystery=$isMystery]"
     }
@@ -67,34 +63,6 @@ data class BountyDataEntry private constructor(
             )
             false -> logic.textSummary(this, isObj, player)
         }
-    }
-
-    companion object {
-
-        fun of(
-            id: String,
-            world: ServerWorld,
-            pos: BlockPos,
-            type: Identifier,
-            content: String,
-            amount: Int,
-            worth: Double,
-            nbt: NbtCompound? = null,
-            name: String? = null,
-            icon: Identifier? = null,
-            isMystery: Boolean = false,
-            rarity: BountyRarity = BountyRarity.COMMON,
-            tracking: JsonObject = JsonObject(emptyMap()),
-            critConditions: JsonObject? = null
-        ): BountyDataEntry {
-            return BountyDataEntry(
-                id, type, content, amount, nbt, name, icon, isMystery, rarity, tracking, critConditions
-            ).apply {
-                this.worth = worth
-                logic.setup(this, world, pos)
-            }
-        }
-
     }
 
 }

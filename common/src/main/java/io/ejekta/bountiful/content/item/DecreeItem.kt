@@ -4,12 +4,13 @@ import io.ejekta.bountiful.bounty.DecreeData
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.decree.DecreeSpawnCondition
 import io.ejekta.bountiful.decree.DecreeSpawnRank
-import net.minecraft.client.item.TooltipContext
+import io.ejekta.kambrik.bridge.Kambridge
+import net.minecraft.client.MinecraftClient
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.item.tooltip.TooltipType
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
-import net.minecraft.world.World
 
 class DecreeItem : Item(
     Settings().maxCount(1).fireproof()
@@ -23,15 +24,18 @@ class DecreeItem : Item(
 
     override fun appendTooltip(
         stack: ItemStack?,
-        world: World?,
+        context: TooltipContext,
         tooltip: MutableList<Text>,
-        context: TooltipContext?
+        type: TooltipType?
     ) {
-        if (stack != null && world != null) {
-            val data = DecreeData[stack].tooltipInfo(world)
-            tooltip.addAll(data)
+        if (Kambridge.isOnServer()) {
+            return
         }
-        super.appendTooltip(stack, world, tooltip, context)
+        if (stack != null) {
+            val data = stack[BountifulContent.DECREE_DATA]?.tooltipInfo(MinecraftClient.getInstance().world!!)
+            tooltip.addAll(data ?: emptySet())
+        }
+        super.appendTooltip(stack, context, tooltip, type)
     }
 
     companion object {
@@ -57,7 +61,7 @@ class DecreeItem : Item(
             val dd = DecreeData(rank = ranked)
             spawnRank.populateFunc(dd, decIds)
             return ItemStack(BountifulContent.DECREE_ITEM).apply {
-                DecreeData[this] = dd
+                this[BountifulContent.DECREE_DATA] = dd
             }
         }
     }

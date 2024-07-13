@@ -16,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.EnchantedBookItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.item.tooltip.TooltipType
 import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 import net.minecraft.text.MutableText
@@ -56,7 +57,7 @@ class BountyTypeItem : IBountyExchangeable {
     }
 
     override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
-        return getItemStack(entry).getTooltip(player, TooltipContext.BASIC)
+        return getItemStack(entry).getTooltip(Item.TooltipContext.DEFAULT, player, TooltipType.BASIC)
     }
 
     override fun getProgress(entry: BountyDataEntry, player: PlayerEntity): Progress {
@@ -84,7 +85,8 @@ class BountyTypeItem : IBountyExchangeable {
 
         for (amtToGive in toGive) {
             val stack = ItemStack(item, amtToGive).apply {
-                nbt = entry.nbt
+                // TODO give itemstack NBT rewards
+                //nbt = entry.nbt
             }
             // Try give directly to player, otherwise drop at feet
             if (!player.giveItemStack(stack)) {
@@ -108,7 +110,8 @@ class BountyTypeItem : IBountyExchangeable {
         fun getItemStack(entry: BountyDataEntry): ItemStack {
             val item = getItem(entry)
             return ItemStack(item).apply {
-                entry.nbt?.let { this.nbt = it }
+                // TODO give itemstack NBT rewards
+                //entry.nbt?.let { this.nbt = it }
             }
         }
 
@@ -116,18 +119,19 @@ class BountyTypeItem : IBountyExchangeable {
             val itemStack = getItemStack(entry)
             var named = itemStack.name.copy()
 
+            // TODO reimplement
             // Show enchanted book enchantments
-            if (itemStack.item is EnchantedBookItem && Kambridge.isOnClient()) {
-                val enchants = EnchantmentHelper.get(itemStack).toList()
-
-                if (enchants.isNotEmpty()) {
-                    named = named.append(" (")
-                    for ((enchant, level) in enchants.dropLast(1)) {
-                        named = named.append(enchant.getName(level)).append(", ")
-                    }
-                    named = named.append(enchants.last().run { first.getName(second) }).append(")")
-                }
-            }
+//            if (itemStack.item is EnchantedBookItem && Kambridge.isOnClient()) {
+//                val enchants = EnchantmentHelper.get(itemStack).toList()
+//
+//                if (enchants.isNotEmpty()) {
+//                    named = named.append(" (")
+//                    for ((enchant, level) in enchants.dropLast(1)) {
+//                        named = named.append(enchant.getName(level)).append(", ")
+//                    }
+//                    named = named.append(enchants.last().run { first.getName(second) }).append(")")
+//                }
+//            }
 
             return named
         }

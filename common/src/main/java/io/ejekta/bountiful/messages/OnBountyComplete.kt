@@ -2,20 +2,21 @@ package io.ejekta.bountiful.messages
 
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.util.ctx
-import io.ejekta.kambrik.message.ClientMsg
+import io.ejekta.kambrik.message.KambrikMsg
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import net.minecraft.client.toast.SystemToast
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.network.packet.CustomPayload
 import net.minecraft.sound.SoundEvent
 import net.minecraft.text.Text
 
 @Serializable
-class OnBountyComplete(
+data class OnBountyComplete(
     private val soundEvent: @Contextual SoundEvent,
     private val volume: Float,
     private val pitch: Float
-) : ClientMsg() {
+) : KambrikMsg() {
     override fun onClientReceived() {
         runLocally(ctx.player!!)
     }
@@ -33,5 +34,11 @@ class OnBountyComplete(
                 )
             )
         }
+    }
+
+    override fun getId(): CustomPayload.Id<OnBountyComplete> = ID
+
+    companion object {
+        val ID = CustomPayload.id<OnBountyComplete>("bounty_complete")
     }
 }

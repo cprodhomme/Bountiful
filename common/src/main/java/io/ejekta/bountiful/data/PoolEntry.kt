@@ -110,14 +110,13 @@ class PoolEntry private constructor() {
             content
         }
 
-        return BountyDataEntry.of(
+        val totWorth = amt * unitWorth
+
+        return BountyDataEntry(
             id,
-            world,
-            pos,
             type,
             actualContent,
             amt,
-            amt * unitWorth,
             nbt,
             name,
             icon,
@@ -125,6 +124,7 @@ class PoolEntry private constructor() {
             rarity = rarity,
             critConditions = conditions
         ).apply {
+            logic.setup(this, world, pos)
             relatedDecreeIds = usedDecs ?: emptySet()
         }
     }

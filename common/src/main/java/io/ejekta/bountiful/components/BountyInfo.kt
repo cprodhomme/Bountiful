@@ -1,24 +1,25 @@
-package io.ejekta.bountiful.bounty
+package io.ejekta.bountiful.components
 
-import io.ejekta.bountiful.Bountiful
+import io.ejekta.bountiful.bounty.BountyData
+import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.util.GameTime
-import io.ejekta.kambrik.serial.ItemDataJson
 import kotlinx.serialization.Serializable
 import net.minecraft.client.MinecraftClient
-import net.minecraft.item.ItemStack
+import net.minecraft.item.Item
+import net.minecraft.item.tooltip.TooltipType
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.world.World
 import kotlin.math.max
 
-@Serializable
-class BountyInfo(
-    var rarity: BountyRarity = BountyRarity.COMMON,
-    var timeStarted: Long = -1L,
-    var timeToComplete: Long = -1L,
-    var timePickedUp: Long = -1L
+@Serializable @JvmRecord
+data class BountyInfo(
+    val rarity: BountyRarity,
+    val timeStarted: Long,
+    val timeToComplete: Long,
+    val timePickedUp: Long
 ) {
 
     fun timeLeftTicks(world: World): Long {
@@ -46,7 +47,7 @@ class BountyInfo(
         return GameTime.formatTimeExpirable(timeLeftSecs(world))
     }
 
-    fun genTooltip(fromData: BountyData, isServer: Boolean, context: TooltipContext): List<MutableText> {
+    fun genTooltip(fromData: BountyData, isServer: Boolean, context: Item.TooltipContext, type: TooltipType): List<MutableText> {
         if (isServer) {
             return emptyList()
         }
@@ -61,7 +62,8 @@ class BountyInfo(
                 it.textSummary(player, false)
             })
 
-            if (context == TooltipContext.ADVANCED && BountifulIO.configData.client.advancedDebugTooltips) {
+            // TODO reimplement advanced tooltip contexts
+            if (type == TooltipType.ADVANCED && BountifulIO.configData.client.advancedDebugTooltips) {
                 add(Text.literal(""))
                 add(Text.literal("Bountiful Debug Info:").formatted(Formatting.GOLD))
                 add(Text.literal("Taken: ${timeTakenSecs(player.world)}, Left: ${timeLeftSecs(player.world)}"))
@@ -69,17 +71,9 @@ class BountyInfo(
         }
     }
 
-    @Suppress("RemoveRedundantQualifierName")
-    companion object : ItemDataJson<BountyInfo>() {
-        override val identifier = Bountiful.id("bounty_info")
-        override val ser = BountyInfo.serializer()
-        override val default: () -> BountyInfo = { BountyInfo() }
-
-        fun setPickedUp(stack: ItemStack, time: Long) {
-            this[stack] = this[stack].apply {
-                timePickedUp = time
-            }
-        }
+    companion object {
+        val DEFAULT = BountyInfo(BountyRarity.COMMON, -1L, -1L, -1L)
     }
+
 
 }
