@@ -16,15 +16,15 @@ import net.minecraft.sound.SoundEvents
 data class BountyEntries(val entries: List<BountyDataEntry>) {
 
     // Objectives
-    fun hasFinishedAll(player: PlayerEntity): Boolean {
+    fun hasFinishedAll(player: PlayerEntity, completions: Map<String, Int>): Boolean {
         return entries.all {
-            (it.logic as IBountyObjective).getProgress(it, player).isComplete()
+            (it.logic as IBountyObjective).getProgress(it, player, completions[it.id] ?: 0).isComplete()
         }
     }
 
-    fun tryFinish(player: PlayerEntity): Boolean {
+    fun tryFinish(player: PlayerEntity, completions: Map<String, Int>): Boolean {
         return entries.all {
-            (it.logic as IBountyObjective).tryFinishObjective(it, player)
+            (it.logic as IBountyObjective).tryFinishObjective(it, player, completions[it.id] ?: 0)
         }
     }
 

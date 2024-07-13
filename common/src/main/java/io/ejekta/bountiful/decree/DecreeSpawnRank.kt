@@ -1,6 +1,6 @@
 package io.ejekta.bountiful.decree
 
-import io.ejekta.bountiful.bounty.DecreeData
+import io.ejekta.bountiful.components.DecreeData
 import kotlin.math.min
 import kotlin.random.Random
 

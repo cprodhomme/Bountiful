@@ -1,6 +1,6 @@
 package io.ejekta.bountiful.content.villager
 
-import io.ejekta.bountiful.bounty.DecreeData
+import io.ejekta.bountiful.components.DecreeData
 import io.ejekta.bountiful.content.item.DecreeItem
 import io.ejekta.bountiful.decree.DecreeSpawnCondition
 import io.ejekta.bountiful.decree.DecreeSpawnRank

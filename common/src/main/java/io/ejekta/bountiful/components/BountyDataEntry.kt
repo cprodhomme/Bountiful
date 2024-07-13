@@ -1,21 +1,20 @@
-package io.ejekta.bountiful.bounty
+package io.ejekta.bountiful.components
 
+import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.bounty.types.IBountyType
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.data.Decree
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonObject
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.server.world.ServerWorld
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
 
 // Tracks the status of a given bounty
 @Serializable @JvmRecord
@@ -62,6 +61,13 @@ data class BountyDataEntry constructor(
                 Text.literal("x$amount").formatted(Formatting.WHITE)
             )
             false -> logic.textSummary(this, isObj, player)
+        }
+    }
+
+
+    fun advanceIn(stack: ItemStack, amount: Int = 1) {
+        stack[BountifulContent.BOUNTY_COMPLETION] = stack[BountifulContent.BOUNTY_COMPLETION]?.modified {
+            this[id] = (this[id] ?: 0) + amount
         }
     }
 

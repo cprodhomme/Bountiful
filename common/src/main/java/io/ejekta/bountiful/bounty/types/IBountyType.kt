@@ -1,6 +1,6 @@
 package io.ejekta.bountiful.bounty.types
 
-import io.ejekta.bountiful.bounty.BountyDataEntry
+import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.data.PoolEntry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer

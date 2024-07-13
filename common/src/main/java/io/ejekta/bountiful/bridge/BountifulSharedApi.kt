@@ -2,8 +2,6 @@ package io.ejekta.bountiful.bridge
 
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.bounty.BountyInfo
-import io.ejekta.bountiful.bounty.DecreeData
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.content.BountifulContent
@@ -12,7 +10,6 @@ import io.ejekta.bountiful.messages.*
 import io.ejekta.bountiful.util.iterateBountyStacks
 import io.ejekta.kambrik.Kambrik
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import net.minecraft.advancement.criterion.EnterBlockCriterion
 import net.minecraft.advancement.criterion.TickCriterion
 import net.minecraft.client.item.ModelPredicateProviderRegistry
@@ -27,7 +24,6 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
-import net.minecraft.village.TradeOffer
 import net.minecraft.village.TradeOffers
 
 interface BountifulSharedApi {
@@ -39,52 +35,28 @@ interface BountifulSharedApi {
             BountifulContent.BOUNTY_ITEM,
             Bountiful.id("rarity")
         ) { stack, clientWorld, livingEntity, seed ->
-            BountyInfo[stack].rarity.ordinal.toFloat() / 10f
+            (stack[BountifulContent.BOUNTY_INFO]?.rarity?.ordinal?.toFloat() ?: 0f) / 10f
         }
 
         ModelPredicateProviderRegistry.register(
             BountifulContent.DECREE_ITEM,
             Bountiful.id("status")
         ) { stack, clientWorld, livingEntity, seed ->
-            val data = DecreeData[stack]
-            if (data.ids.isNotEmpty()) 1f else 0f
+            val data = stack[BountifulContent.DECREE_DATA]
+            if ((data?.ids ?: emptySet()).isNotEmpty()) 1f else 0f
         }
     }
 
     fun registerServerMessages() {
-        Kambrik.Message.registerServerMessage(
-            SelectBounty.serializer(),
-            SelectBounty::class,
-            Bountiful.id("select_bounty")
-        )
-
-        Kambrik.Message.registerServerMessage(
-            ServerPlayerStatus.serializer(),
-            ServerPlayerStatus::class,
-            Bountiful.id("server_player_status")
-        )
+        Kambrik.Message.registerServerMessage(SelectBounty.serializer(), SelectBounty.ID)
+        Kambrik.Message.registerServerMessage(ServerPlayerStatus.serializer(), ServerPlayerStatus.ID)
     }
 
     fun registerClientMessages() {
-        Kambrik.Message.registerClientMessage(
-            ClipboardCopy.serializer(),
-            ClipboardCopy::class,
-            Bountiful.id("clipboard_copy")
-        )
-
+        Kambrik.Message.registerClientMessage(ClipboardCopy.serializer(), ClipboardCopy.ID)
         Kambrik.Message.registerClientMessage(OnBountyComplete.serializer(), OnBountyComplete.ID)
-
-        Kambrik.Message.registerClientMessage(
-            UpdateBountyCriteriaObjective.serializer(),
-            UpdateBountyCriteriaObjective::class,
-            Bountiful.id("update_bounty_criteria")
-        )
-
-        Kambrik.Message.registerClientMessage(
-            ClientPlayerStatus.serializer(),
-            ClientPlayerStatus::class,
-            Bountiful.id("client_player_status")
-        )
+        Kambrik.Message.registerClientMessage(UpdateCriteriaObjective.serializer(), UpdateCriteriaObjective.ID)
+        Kambrik.Message.registerClientMessage(ClientPlayerStatus.serializer(), ClientPlayerStatus.ID)
     }
 
     fun registerJigsawPieces(server: MinecraftServer) {
@@ -162,7 +134,7 @@ interface BountifulSharedApi {
 
                         if (result) {
                             obj.current += 1
-                            UpdateBountyCriteriaObjective(
+                            UpdateCriteriaObjective(
                                 player.inventory.indexOf(this),
                                 data.objectives.indexOf(obj)
                             ).sendToClient(player)

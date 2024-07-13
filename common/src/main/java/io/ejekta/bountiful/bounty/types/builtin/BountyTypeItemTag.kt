@@ -1,8 +1,8 @@
 package io.ejekta.bountiful.bounty.types.builtin
 
-import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.types.IBountyExchangeable
 import io.ejekta.bountiful.bounty.types.Progress
+import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.bountiful.util.getTagItemKey
 import io.ejekta.bountiful.util.getTagItems
@@ -58,15 +58,15 @@ class BountyTypeItemTag : IBountyExchangeable {
         )
     }
 
-    override fun getProgress(entry: BountyDataEntry, player: PlayerEntity): Progress {
+    override fun getProgress(entry: BountyDataEntry, player: PlayerEntity, current: Int): Progress {
         return Progress(getCurrentStacks(entry, player)?.values?.sum() ?: 0, entry.amount)
     }
 
-    override fun getNewCurrent(entry: BountyDataEntry, player: PlayerEntity): Int {
+    override fun getNewCurrent(entry: BountyDataEntry, player: PlayerEntity, current: Int): Int {
         return getCurrentStacks(entry, player)?.values?.sum() ?: 0
     }
 
-    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity): Boolean {
+    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
         return getCurrentStacks(entry, player)?.let {
             it.forEach { (stack, toShrink) ->
                 stack.decrement(toShrink)

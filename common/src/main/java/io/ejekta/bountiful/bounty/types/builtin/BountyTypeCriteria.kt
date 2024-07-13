@@ -1,8 +1,8 @@
 package io.ejekta.bountiful.bounty.types.builtin
 
-import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.bounty.types.Progress
+import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.data.PoolEntry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer
@@ -33,12 +33,12 @@ class BountyTypeCriteria : IBountyObjective {
         )
     }
 
-    override fun getProgress(entry: BountyDataEntry, player: PlayerEntity): Progress {
-        return Progress(entry.current, entry.amount)
+    override fun getProgress(entry: BountyDataEntry, player: PlayerEntity, current: Int): Progress {
+        return Progress(current, entry.amount)
     }
 
-    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity): Boolean {
-        return entry.current >= entry.amount
+    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
+        return current >= entry.amount
     }
 
 }

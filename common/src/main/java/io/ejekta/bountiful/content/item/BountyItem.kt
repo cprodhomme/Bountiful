@@ -23,7 +23,7 @@ class BountyItem : Item(
 
     override fun getName(stack: ItemStack): Text {
         // TODO this may be sided
-        val info = BountyInfo[stack]
+        val info = stack[BountifulContent.BOUNTY_INFO] ?: return Text.literal("ERR? No Info")
         var text = Text.translatable(info.rarity.name.lowercase()
             // Capitalizing
             .replaceFirstChar {
@@ -51,8 +51,9 @@ class BountyItem : Item(
         }
 
         val objs = stack[BountifulContent.BOUNTY_OBJS]
-        return if (objs?.hasFinishedAll(player) == true) {
-            objs.tryFinish(player)
+        val comp = stack[BountifulContent.BOUNTY_COMPLETION]?.amounts ?: emptyMap()
+        return if (objs?.hasFinishedAll(player, comp) == true) {
+            objs.tryFinish(player, stack[BountifulContent.BOUNTY_COMPLETION]?.amounts ?: emptyMap())
             stack[BountifulContent.BOUNTY_REWS]!!.rewardPlayer(player)
             stack.decrement(stack.maxCount)
             true
@@ -77,19 +78,6 @@ class BountyItem : Item(
             tooltip?.addAll(data ?: emptySet())
         }
         super.appendTooltip(stack, context, tooltip, type)
-    }
-
-    override fun appendTooltip(
-        stack: ItemStack?,
-        world: World?,
-        tooltip: MutableList<Text>?,
-        context: TooltipContext
-    ) {
-        if (stack != null && world != null) {
-            val data = BountyInfo[stack].genTooltip(BountyData[stack], world is ServerWorld, context)
-            tooltip?.addAll(data)
-        }
-        super.appendTooltip(stack, world, tooltip, context)
     }
 
 }

@@ -1,8 +1,8 @@
 package io.ejekta.bountiful.bounty.types.builtin
 
-import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.types.IBountyExchangeable
 import io.ejekta.bountiful.bounty.types.Progress
+import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.bountiful.util.getTagItemKey
 import io.ejekta.bountiful.util.getTagItems
@@ -60,15 +60,15 @@ class BountyTypeItem : IBountyExchangeable {
         return getItemStack(entry).getTooltip(Item.TooltipContext.DEFAULT, player, TooltipType.BASIC)
     }
 
-    override fun getProgress(entry: BountyDataEntry, player: PlayerEntity): Progress {
+    override fun getProgress(entry: BountyDataEntry, player: PlayerEntity, current: Int): Progress {
         return Progress(getCurrentStacks(entry, player).values.sum(), entry.amount)
     }
 
-    override fun getNewCurrent(entry: BountyDataEntry, player: PlayerEntity): Int {
+    override fun getNewCurrent(entry: BountyDataEntry, player: PlayerEntity, current: Int): Int {
         return getCurrentStacks(entry, player).values.sum()
     }
 
-    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity): Boolean {
+    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
         val currStacks = getCurrentStacks(entry, player)
         if (currStacks.values.sum() >= entry.amount) {
             currStacks.forEach { (stack, toShrink) ->

@@ -1,4 +1,4 @@
-package io.ejekta.bountiful.bounty
+package io.ejekta.bountiful.components
 
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.content.BountifulContent
@@ -10,7 +10,6 @@ import net.minecraft.world.World
 
 @Serializable @JvmRecord
 data class DecreeData(val ids: Set<String> = setOf(), val rank: Int = 1) {
-
     fun tooltipInfo(world: World): List<Text> {
         return mutableListOf<Text>() + when (ids.isNotEmpty()) {
             true -> {
@@ -29,9 +28,4 @@ data class DecreeData(val ids: Set<String> = setOf(), val rank: Int = 1) {
             }
         }
     }
-
-    companion object {
-        fun yes(): ComponentType<DecreeData> = BountifulContent.DECREE_DATA
-    }
-
 }

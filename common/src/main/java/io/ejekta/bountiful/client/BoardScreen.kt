@@ -3,6 +3,7 @@ package io.ejekta.bountiful.client
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.client.widgets.BountyLongButton
+import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.BountyCreator
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.gui.BoardScreenHandler
@@ -36,7 +37,7 @@ class BoardScreen(handler: ScreenHandler, inventory: PlayerInventory, title: Tex
     private val buttons = (0 until 21).map { BountyLongButton(this, it) }
 
     private val validButtons: List<BountyLongButton>
-        get() = buttons.filter { it.getBountyData().objectives.isNotEmpty() }
+        get() = buttons.filter { it.getStack()[BountifulContent.BOUNTY_OBJS]!!.entries.isNotEmpty() }
 
     private val scroller = KScrollbarVertical(140, 6, 27, SCROLLER, 0x0)
 

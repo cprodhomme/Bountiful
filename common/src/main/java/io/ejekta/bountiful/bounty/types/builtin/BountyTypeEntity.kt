@@ -1,10 +1,9 @@
 package io.ejekta.bountiful.bounty.types.builtin
 
 import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.bounty.BountyDataEntry
-import io.ejekta.bountiful.bounty.BountyInfo
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.IBountyObjective
+import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.bountiful.util.iterateBountyStacks
@@ -52,20 +51,18 @@ class BountyTypeEntity : IBountyObjective {
             return
         }
         playerEntity.iterateBountyStacks {
-            val info = this[BountifulContent.BOUNTY_INFO]
-            val data = BountyData[this]
-            val entityObjs = data.objectives.filter { it.logicId == this@BountyTypeEntity.id }
+            val objs = this[BountifulContent.BOUNTY_OBJS] ?: return@iterateBountyStacks
+            val entityObjs = objs.entries.filter { it.logicId == this@BountyTypeEntity.id }
             if (entityObjs.isNotEmpty()) {
                 var changes = false
                 for (obj in entityObjs) {
                     if (obj.content == killedEntity.type.identifier.toString()) {
-                        obj.current += 1
+                        obj.advanceIn(this)
                         changes = true
                     }
                 }
                 if (changes) {
-                    BountyData[this] = data
-                    data.checkForCompletionAndAlert(playerEntity, this)
+                    objs.checkForCompletionAndAlert(playerEntity, this)
                 }
             }
         }

@@ -2,9 +2,9 @@ package io.ejekta.bountiful.content.board
 
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.bounty.BountyInfo
-import io.ejekta.bountiful.bounty.DecreeData
+import io.ejekta.bountiful.components.DecreeData
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItem
+import io.ejekta.bountiful.components.BountyInfo
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.content.BountifulContent
@@ -54,7 +54,6 @@ import net.minecraft.world.poi.PointOfInterestType
 import java.util.*
 import java.util.function.Predicate
 import kotlin.jvm.optionals.getOrNull
-import kotlin.random.Random
 
 
 class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(BountifulContent.BOARD_ENTITY, pos, state), NamedScreenHandlerFactory {
@@ -280,7 +279,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
                 if (stack.item !is BountyItem) {
                     continue
                 }
-                val info = BountyInfo[stack]
+                val info = stack[BountifulContent.BOUNTY_INFO]
                 if (info.timeLeftTicks(it) <= 0) {
                     removeBounty(i)
                 }

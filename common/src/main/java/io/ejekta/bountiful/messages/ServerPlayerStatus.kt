@@ -1,14 +1,21 @@
 package io.ejekta.bountiful.messages
 
 import io.ejekta.bountiful.content.BountifulContent
-import io.ejekta.kambrik.message.ServerMsg
+import io.ejekta.kambrik.message.KambrikMsg
 import kotlinx.serialization.Serializable
+import net.minecraft.network.packet.CustomPayload
 
 @Serializable
-class ServerPlayerStatus(private val statusType: Type) : ServerMsg() {
+class ServerPlayerStatus(private val statusType: Type) : KambrikMsg() {
 
     override fun onServerReceived(ctx: MsgContext) {
         statusType.msgFunc(ctx)
+    }
+
+    override fun getId(): CustomPayload.Id<out CustomPayload> = ID
+
+    companion object {
+        val ID = CustomPayload.id<ServerPlayerStatus>("server_player_status")
     }
 
     enum class Type(val msgFunc: MsgContext.() -> Unit) {

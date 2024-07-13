@@ -3,6 +3,7 @@ package io.ejekta.bountiful.bounty
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.bounty.types.IBountyReward
+import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.messages.OnBountyComplete

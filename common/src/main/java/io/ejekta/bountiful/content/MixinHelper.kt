@@ -1,18 +1,14 @@
 package io.ejekta.bountiful.content
 
 import com.google.common.collect.ImmutableList
-import io.ejekta.bountiful.bounty.DecreeData
+import io.ejekta.bountiful.components.DecreeData
 import io.ejekta.bountiful.content.item.DecreeItem
 import io.ejekta.bountiful.content.villager.WalkToBoardTask
-import net.minecraft.entity.ai.brain.task.FindPointOfInterestTask
-import net.minecraft.entity.ai.brain.task.GoToIfNearbyTask
 import net.minecraft.entity.ai.brain.task.Task
 import net.minecraft.entity.passive.VillagerEntity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.AnvilScreenHandler
-import net.minecraft.screen.ForgingScreenHandler
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.village.VillagerProfession
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable

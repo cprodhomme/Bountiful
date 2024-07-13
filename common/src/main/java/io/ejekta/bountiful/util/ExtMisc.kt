@@ -35,9 +35,6 @@ fun randomSplit(num: Double, ways: Int): List<Double> {
     return bits.map { (it / sum) * num }
 }
 
-val ClientMsg.ctx: MinecraftClient
-    get() = MinecraftClient.getInstance()
-
 val Inventory.readOnlyCopy: DefaultedList<ItemStack>
     get() = DefaultedList.ofSize(size(), ItemStack.EMPTY).apply {
         (0 until size()).forEach { i -> this[i] = getStack(i) }

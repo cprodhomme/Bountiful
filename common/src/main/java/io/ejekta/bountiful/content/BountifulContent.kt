@@ -2,10 +2,7 @@ package io.ejekta.bountiful.content
 
 import com.mojang.serialization.Codec
 import io.ejekta.bountiful.advancement.SimpleCriterion
-import io.ejekta.bountiful.bounty.DecreeData
-import io.ejekta.bountiful.components.BountyEntries
-import io.ejekta.bountiful.components.BountyInfo
-import io.ejekta.bountiful.components.BountyPing
+import io.ejekta.bountiful.components.*
 import io.ejekta.bountiful.content.board.BoardBlock
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.gui.AnalyzerScreenHandler
@@ -63,6 +60,7 @@ object BountifulContent : KambrikAutoRegistrar {
     val BOUNTY_PING by "bounty_ping".forComponent(BountyPing.serializer())
     val BOUNTY_OBJS by "objects".forComponent(BountyEntries.serializer())
     val BOUNTY_REWS by "rewards".forComponent(BountyEntries.serializer())
+    val BOUNTY_COMPLETION by "completion".forComponent(BountyCompletion.serializer())
     val DECREE_DATA by "decree_data".forComponent(DecreeData.serializer())
 
     object CustomStats {

@@ -1,33 +1,18 @@
 package io.ejekta.bountiful.client
 
 import io.ejekta.bountiful.Bountiful
-import io.ejekta.bountiful.bounty.BountyRarity
-import io.ejekta.bountiful.bounty.DecreeData
+import io.ejekta.bountiful.components.DecreeData
 import io.ejekta.bountiful.client.widgets.AnalyzerPoolWidget
-import io.ejekta.bountiful.client.widgets.BountyLongButton
 import io.ejekta.bountiful.content.BountifulContent
-import io.ejekta.bountiful.content.BountyCreator
-import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.gui.AnalyzerScreenHandler
-import io.ejekta.bountiful.content.gui.BoardScreenHandler
-import io.ejekta.bountiful.data.Decree
-import io.ejekta.bountiful.data.Pool
-import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.kambrik.gui.draw.KGui
 import io.ejekta.kambrik.gui.draw.reactor.MouseReactor
-import io.ejekta.kambrik.gui.draw.widgets.KListWidget
 import io.ejekta.kambrik.gui.draw.widgets.KScrollbarVertical
 import io.ejekta.kambrik.gui.screen.KambrikHandledScreen
-import io.ejekta.kambrik.gui.screen.KambrikScreen
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.ItemStack
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.text.Text
-import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
-import java.awt.Color
-import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 
@@ -77,7 +62,7 @@ class AnalyzerScreen(handler: ScreenHandler, inventory: PlayerInventory, title: 
 
         val doot = (screenHandler as? AnalyzerScreenHandler) ?: return
 
-        val di = DecreeData[doot.inventory.getStack(0)]
+        val di = doot.inventory.getStack(0)[BountifulContent.DECREE_DATA] ?: return
 
         val decrees = di.ids.mapNotNull { BountifulContent.Decrees.find { d -> d.id == it } }
 

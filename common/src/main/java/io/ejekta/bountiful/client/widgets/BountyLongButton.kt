@@ -2,12 +2,14 @@ package io.ejekta.bountiful.client.widgets
 
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeEntity
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItem
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItemTag
 import io.ejekta.bountiful.client.BoardScreen
+import io.ejekta.bountiful.components.BountyDataEntry
+import io.ejekta.bountiful.components.BountyEntries
+import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.messages.SelectBounty
 import io.ejekta.kambrik.gui.draw.KGuiDsl
 import io.ejekta.kambrik.gui.draw.KWidget
@@ -27,8 +29,8 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
     override val width: Int = ButtonWidth
     override val height: Int = ButtonHeight
 
-    fun getBountyData(): BountyData {
-        return BountyData[parent.boardHandler.inventory.getStack(bountyIndex)]
+    fun getStack(): ItemStack {
+        return parent.boardHandler.inventory.getStack(bountyIndex)
     }
 
     private val reactor = MouseReactor().apply {
@@ -131,10 +133,10 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
                 }
             }
 
-            val data = getBountyData()
+
 
             // Render objectives
-            renderEntries(data.objectives) { rx, ry, e ->
+            renderEntries(getStack()[BountifulContent.BOUNTY_OBJS]!!) { rx, ry, e ->
                 renderEntry(this, e, rx, ry, false)
             }
 
@@ -143,7 +145,7 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
             }
 
             // Render rewards
-            renderEntries(data.rewards) { rx, ry, e ->
+            renderEntries(getStack()[BountifulContent.BOUNTY_REWS]!!) { rx, ry, e ->
                 renderEntry(this, e, BountyZoneSize + ArrowWidth + rx, ry, true)
             }
         }
@@ -158,12 +160,12 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
         const val ArrowWidth = 20
         const val BountyZoneSize = (ButtonWidth - ArrowWidth) / 2
 
-        fun KGuiDsl.renderEntries(entries: List<BountyDataEntry>, renderFunc: KGuiDsl.(rx: Int, ry: Int, e: BountyDataEntry) -> Unit) {
-            for (i in entries.indices) {
-                val spaceDiff = BountyZoneSize - (entries.size * 18)
+        fun KGuiDsl.renderEntries(entries: BountyEntries, renderFunc: KGuiDsl.(rx: Int, ry: Int, e: BountyDataEntry) -> Unit) {
+            for (i in entries.entries.indices) {
+                val spaceDiff = BountyZoneSize - (entries.entries.size * 18)
                 val spaceStart = spaceDiff / 2
                 renderFunc(
-                    (spaceStart + (i * 18)), 1, entries[i]
+                    (spaceStart + (i * 18)), 1, entries.entries[i]
                 )
             }
         }
