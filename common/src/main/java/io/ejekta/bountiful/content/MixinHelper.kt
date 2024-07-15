@@ -36,18 +36,16 @@ object MixinHelper {
         val inA = handler.input.getStack(0)
         val inB = handler.input.getStack(1)
         if (!inA.isEmpty && inA.item is DecreeItem && !inB.isEmpty && inB.item is DecreeItem) {
-            val dataA = DecreeData[inA]
-            val dataB = DecreeData[inB]
+            val dataA = inA[BountifulContent.DECREE_DATA] ?: return
+            val dataB = inB[BountifulContent.DECREE_DATA] ?: return
 
             if (dataA.ids == dataB.ids) {
                 return
             }
 
-            val combined = dataA.copy().apply {
-                ids.addAll(dataB.ids)
-            }
+            val combined = dataA.copy(ids = dataA.ids + dataB.ids)
             val decreeProto = ItemStack(BountifulContent.DECREE_ITEM)
-            DecreeData[decreeProto] = combined
+            decreeProto[BountifulContent.DECREE_DATA] = combined
             handler.levelCost.set(combined.ids.size * 3 - 1)
             handler.output.setStack(0, decreeProto)
         }

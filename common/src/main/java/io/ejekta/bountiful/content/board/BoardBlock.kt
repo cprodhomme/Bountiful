@@ -106,11 +106,11 @@ class BoardBlock : BlockWithEntity(
                 val holding = it.getStackInHand(hand)
 
                 if (holding.item is BountyItem) {
-                    val data = BountyData[holding]
+                    //val data = BountyData[holding]
                     val boardEntity = it.world.getBlockEntity(pos) as? BoardBlockEntity ?: return ActionResult.FAIL
-                    val success = data.tryCashIn(it, holding)
+                    val success = (holding.item as BountyItem).tryCashIn(it, holding)
                     if (success) {
-                        boardEntity.updateUponBountyCompletion(it, data, BountyInfo[holding])
+                        boardEntity.updateUponBountyCompletion(it, holding[BountifulContent.BOUNTY_OBJS]!!, holding[BountifulContent.BOUNTY_INFO]!!)
                         boardEntity.markDirty()
                         return ActionResult.CONSUME
                     }

@@ -18,11 +18,12 @@ import net.minecraft.util.Identifier
 
 // Tracks the status of a given bounty
 @Serializable @JvmRecord
-data class BountyDataEntry constructor(
+data class BountyDataEntry(
     val id: String,
     val logicId: @Contextual Identifier,
     val content: String,
     val amount: Int,
+    val worth: Int,
     val nbt: @Contextual NbtCompound? = null,
     val name: String? = null,
     val icon: @Contextual Identifier? = null,

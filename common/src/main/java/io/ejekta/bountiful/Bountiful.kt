@@ -1,14 +1,10 @@
-@file:UseSerializers(IdentitySer::class)
 package io.ejekta.bountiful
 
 import io.ejekta.bountiful.bounty.types.IBountyType
 import io.ejekta.kambrik.Kambrik
-import io.ejekta.kambrik.serial.serializers.IdentitySer
-import kotlinx.serialization.UseSerializers
 import net.minecraft.registry.Registry
 import net.minecraft.registry.RegistryKey
 import net.minecraft.util.Identifier
-
 
 class Bountiful {
     companion object {

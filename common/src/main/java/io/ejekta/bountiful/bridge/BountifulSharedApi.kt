@@ -1,7 +1,6 @@
 package io.ejekta.bountiful.bridge
 
 import io.ejekta.bountiful.Bountiful
-import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.content.BountifulContent
@@ -10,6 +9,7 @@ import io.ejekta.bountiful.messages.*
 import io.ejekta.bountiful.util.iterateBountyStacks
 import io.ejekta.kambrik.Kambrik
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import net.minecraft.advancement.criterion.EnterBlockCriterion
 import net.minecraft.advancement.criterion.TickCriterion
 import net.minecraft.client.item.ModelPredicateProviderRegistry
@@ -114,9 +114,11 @@ interface BountifulSharedApi {
         Kambrik.Criterion.subscribe { player, criterion, predicate ->
             if (criterion !is TickCriterion && criterion !is EnterBlockCriterion) {
                 player.iterateBountyStacks {
-                    val data = BountyData[this]
 
-                    val triggerObjs = data.objectives.filter { it.critConditions != null }.takeIf { it.isNotEmpty() }
+                    val objEntries = this[BountifulContent.BOUNTY_OBJS] ?: return@iterateBountyStacks
+                    val objectives = objEntries.entries
+
+                    val triggerObjs = objectives.filter { it.critConditions != null }.takeIf { it.isNotEmpty() }
                         ?: emptyList()
 
                     for (obj in triggerObjs) {
@@ -133,18 +135,15 @@ interface BountifulSharedApi {
                         )
 
                         if (result) {
-                            obj.current += 1
+                            obj.advanceIn(this)
                             UpdateCriteriaObjective(
                                 player.inventory.indexOf(this),
-                                data.objectives.indexOf(obj)
+                                objectives.indexOf(obj)
                             ).sendToClient(player)
-
-                            BountyData[this] = data // update server with new data
                         }
                     }
 
-                    data.checkForCompletionAndAlert(player, this)
-
+                    objEntries.checkForCompletionAndAlert(player, this)
                 }
             }
         }

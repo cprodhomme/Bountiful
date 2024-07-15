@@ -4,6 +4,7 @@ import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.components.DecreeData
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItem
+import io.ejekta.bountiful.components.BountyEntries
 import io.ejekta.bountiful.components.BountyInfo
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.JsonFormats
@@ -34,6 +35,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtString
 import net.minecraft.registry.Registries
+import net.minecraft.registry.RegistryWrapper
 import net.minecraft.registry.entry.RegistryEntry
 import net.minecraft.screen.NamedScreenHandlerFactory
 import net.minecraft.screen.PropertyDelegate
@@ -133,7 +135,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
             decrees.readOnlyCopy.filter {
                 it.item is DecreeItem && it.count > 0
             }.map {
-                DecreeData[it].ids
+                it[BountifulContent.DECREE_DATA]?.ids ?: emptySet()
             }.flatten().toSet()
         )
     }
@@ -156,7 +158,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         }
     }
 
-    fun updateUponBountyCompletion(player: ServerPlayerEntity, bountyData: BountyData, bountyInfo: BountyInfo) {
+    fun updateUponBountyCompletion(player: ServerPlayerEntity, objectives: BountyEntries, bountyInfo: BountyInfo) {
         // Award advancement to player
         BountifulContent.Triggers.BOUNTY_COMPLETED.trigger(player)
 
@@ -185,9 +187,9 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         // Tick completion upwards
         incrementCompletedBounties(player)
         // Fill pickups
-        villagerPickupPopulate(bountyData)
+        villagerPickupPopulate(objectives)
         // Have a villager check on the board
-        getBestVillager(bountyData)?.checkOnBoard(pos)
+        getBestVillager(objectives)?.checkOnBoard(pos)
     }
 
     private fun addBountyToRandomSlot(stack: ItemStack) {
@@ -261,7 +263,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
     }
 
     private fun checkUserPlacedAllDecrees(player: ServerPlayerEntity, newStack: ItemStack) {
-        val newDecrees = DecreeData[newStack].ids
+        val newDecrees = newStack[BountifulContent.DECREE_DATA]!!.ids
         val decs = getBoardDecrees().map { it.id }.toSet() + newDecrees
         val allDecreesSet = BountifulContent.Decrees.map { it.id }.toSet()
         val allDecrees = decs.intersect(allDecreesSet) == allDecreesSet
@@ -279,7 +281,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
                 if (stack.item !is BountyItem) {
                     continue
                 }
-                val info = stack[BountifulContent.BOUNTY_INFO]
+                val info = stack[BountifulContent.BOUNTY_INFO] ?: continue
                 if (info.timeLeftTicks(it) <= 0) {
                     removeBounty(i)
                 }
@@ -359,7 +361,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
 
     // Serialization
 
-    override fun readNbt(base: NbtCompound) {
+    override fun readNbt(base: NbtCompound, registryLookup: RegistryWrapper.WrapperLookup) {
         val decreeList = base.getCompound("decree_inv") ?: return
         val bountyList = base.getCompound("bounty_inv") ?: return
 
@@ -368,12 +370,14 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
 
         Inventories.readNbt(
             decreeList,
-            decrees.getHeldStacks()
+            decrees.heldStacks,
+            registryLookup
         )
 
         Inventories.readNbt(
             bountyList,
-            bounties.getHeldStacks()
+            bounties.heldStacks,
+            serverWorld!!.registryManager
         )
 
         val doneMap = base.get("completed")
@@ -395,8 +399,8 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         }
     }
 
-    override fun writeNbt(base: NbtCompound) {
-        super.writeNbt(base)
+    override fun writeNbt(base: NbtCompound, registryLookup: RegistryWrapper.WrapperLookup?) {
+        super.writeNbt(base, registryLookup)
 
         base.putString("boardId", boardUUID)
 
@@ -414,10 +418,10 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         )
 
         val decreeList = NbtCompound()
-        Inventories.writeNbt(decreeList, decrees.readOnlyCopy)
+        Inventories.writeNbt(decreeList, decrees.readOnlyCopy, registryLookup)
 
         val bountyList = NbtCompound()
-        Inventories.writeNbt(bountyList, bounties.readOnlyCopy)
+        Inventories.writeNbt(bountyList, bounties.readOnlyCopy, registryLookup)
 
         base.put("decree_inv", decreeList)
         base.put("bounty_inv", bountyList)
@@ -425,8 +429,8 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
 
     // Villager & Completion Logic
 
-    private fun villagerPickupPopulate(bountyData: BountyData) {
-        val stackMap = bountyData.objectives.filter { it.logic is BountyTypeItem }.map {
+    private fun villagerPickupPopulate(objectives: BountyEntries) {
+        val stackMap = objectives.entries.filter { it.logic is BountyTypeItem }.map {
             BountyTypeItem.getItemStack(it) to it.getRelatedProfessions()
         }
         for ((stack, profs) in stackMap) {
@@ -495,7 +499,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         return false
     }
 
-    private fun getBestVillager(bountyData: BountyData): VillagerEntity? {
+    private fun getBestVillager(objectives: BountyEntries): VillagerEntity? {
         val nearestVillagers = findNearestVillagers(64)
         if (nearestVillagers.isEmpty()) {
             return null
@@ -503,7 +507,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
 
         val villagerProfessions = nearestVillagers.map { it.villagerData.profession.id }.toSet()
 
-        val matchingProfs = bountyData.objectives.filter {
+        val matchingProfs = objectives.entries.filter {
             it.getRelatedProfessions().intersect(villagerProfessions).isNotEmpty()
         }
 

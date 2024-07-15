@@ -2,9 +2,11 @@ package io.ejekta.bountiful.content
 
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.bounty.BountyData
+import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.bounty.types.IBountyReward
 import io.ejekta.bountiful.components.BountyDataEntry
+import io.ejekta.bountiful.components.BountyEntries
 import io.ejekta.bountiful.components.BountyInfo
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.data.Decree
@@ -29,12 +31,20 @@ class BountyCreator private constructor(
     private val rewardsFirst = !BountifulIO.configData.bounty.reverseMatchingAlgorithm
 
     private var data = BountyData()
-    private var info = BountyInfo.DEFAULT
+    //private var info = BountyInfo.DEFAULT
+
+    internal val objectives = mutableListOf<BountyDataEntry>()
+    internal val rewards = mutableListOf<BountyDataEntry>()
+
+    private var infoRarity = BountyRarity.COMMON
+    private var infoTimeStarted = -1L
+    private var infoTimePickedUp = -1L
+    private var infoTimeToComplete = -1L
 
     enum class CreationType(
         val named: String,
         val poolGetter: (Decree) -> List<Pool>,
-        val dataGetter: (BountyData) -> MutableList<BountyDataEntry>,
+        val dataGetter: (BountyCreator) -> MutableList<BountyDataEntry>,
         val itemFilter: (PoolEntry) -> Boolean
     ) {
         REW("reward", { it.rewardPools }, { it.rewards }, { it.typeLogic is IBountyReward }),
@@ -51,31 +61,37 @@ class BountyCreator private constructor(
     val stack: ItemStack by lazy {
         create()
         ItemStack(BountifulContent.BOUNTY_ITEM).apply {
-            BountyData[this] = data
-            this[BountifulContent.BOUNTY_INFO] = info
+            this[BountifulContent.BOUNTY_OBJS] = BountyEntries(objectives)
+            this[BountifulContent.BOUNTY_REWS] = BountyEntries(rewards)
+            this[BountifulContent.BOUNTY_INFO] = BountyInfo(
+                infoRarity,
+                infoTimeStarted,
+                infoTimeToComplete,
+                infoTimePickedUp
+            )
         }
     }
 
-    fun create(): Pair<BountyData, BountyInfo> {
+    fun create() {
         // Gen reward entries and max rarity
         val initialEntries = genInitialEntries()
 
         if (initialEntries.isEmpty()) {
             val initialName = getCreation(true).named
             Bountiful.LOGGER.error("${initialName.uppercase()}s are empty, can only generate an empty $initialName")
-            return data to info
+            return
         }
 
-        info.rarity = initialEntries.maxOf { it.rarity }
+        infoRarity = initialEntries.maxOf { it.rarity }
 
         // Gen rewards and total worth
         val initialPicks = genInitial(initialEntries)
         val totalInitialWorth = initialPicks.sumOf { it.worth }
-        getCreation(true).dataGetter(data).addAll(initialPicks)
+        getCreation(true).dataGetter(this).addAll(initialPicks)
 
         // return early if we have no rewards :(
         if (initialPicks.isEmpty()) {
-            return data to info
+            return
         }
 
         // Gen filler
@@ -83,14 +99,11 @@ class BountyCreator private constructor(
             totalInitialWorth * (1 + (BountifulIO.configData.bounty.objectiveDifficultyModifierPercent * 0.01)),
             initialEntries
         )
-        getCreation(false).dataGetter(data).addAll(fillerPicks)
+        getCreation(false).dataGetter(this).addAll(fillerPicks)
 
-        info.timeStarted = startTime
-        info.timePickedUp = startTime // just for now
-        info.timeToComplete += 750L + BountifulIO.configData.bounty.flatBonusTimePerBountyInSecs
-
-
-        return data to info
+        infoTimeStarted = startTime
+        infoTimePickedUp = startTime // just for now
+        infoTimeToComplete += 750L + BountifulIO.configData.bounty.flatBonusTimePerBountyInSecs
     }
 
     private fun genInitial(entries: List<PoolEntry>): List<BountyDataEntry> {
@@ -130,7 +143,7 @@ class BountyCreator private constructor(
 
     private fun getAllPossibleFillers(initialPools: List<PoolEntry>): List<PoolEntry> {
         return getEntriesFor(decrees, getCreation(false)).filter {
-            it.content !in getCreation(true).dataGetter(data).map { item -> item.content }
+            it.content !in getCreation(true).dataGetter(this).map { item -> item.content }
         }.filter { entry ->
             // obj entry can not be in any reward forbidlist
             // no rew entry can be in this obj entry's forbidlist either
@@ -174,7 +187,7 @@ class BountyCreator private constructor(
             val entry = picked.toEntry(world, pos, w, decrees.map { it.id }.toSet())
 
             // Add time based on entry
-            info.timeToComplete += (picked.timeMult * entry.worth * 0.35).toLong()
+            infoTimeToComplete += (picked.timeMult * entry.worth * 0.35).toLong()
 
             // Append on a new worth to add obj for
             // if we still haven't fulfilled it

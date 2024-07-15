@@ -5,6 +5,7 @@ import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.gui.BoardScreenHandler
 import io.ejekta.bountiful.content.item.BountyItem
+import io.ejekta.kambrik.message.KambrikMsg
 import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.ai.brain.Brain
 import net.minecraft.entity.ai.brain.MemoryModuleType
@@ -131,6 +132,9 @@ fun <T> getRegistryTags(reg: DynamicRegistryManager, tagKey: TagKey<T>): List<T>
     }.toList().flatten()
     return streamed
 }
+
+val KambrikMsg.ctx: MinecraftClient
+    get() = MinecraftClient.getInstance()
 
 fun ServerPlayerEntity.iterateBountyStacks(func: ItemStack.() -> Unit) {
     inventory.main.filter {

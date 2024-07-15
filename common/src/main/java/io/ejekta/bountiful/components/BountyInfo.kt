@@ -72,7 +72,7 @@ data class BountyInfo(
     }
 
     companion object {
-        val DEFAULT = BountyInfo(BountyRarity.COMMON, -1L, -1L, -1L)
+        val EMPTY = BountyInfo(BountyRarity.COMMON, -1L, -1L, -1L)
     }
 
 
