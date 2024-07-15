@@ -39,8 +39,8 @@ class BountyTypeItemTag : IBountyObjective {
         }
     }
 
-    override fun textSummary(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity): MutableText {
-        val progress = getProgress(entry, player)
+    override fun textOnBounty(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity, current: Int): MutableText {
+        val progress = getProgress(entry, player, current)
         val title = if (entry.name != null) Text.literal(entry.name) else entry.translation
         return when (isObj) {
             true -> title.copy().formatted(progress.color).append(progress.neededText.colored(Formatting.WHITE))
@@ -48,7 +48,7 @@ class BountyTypeItemTag : IBountyObjective {
         }
     }
 
-    override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
+    override fun textOnBoardSidebar(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
         return listOf(
             if (entry.name != null) {
                 Text.literal(entry.name)

@@ -1,8 +1,7 @@
 package io.ejekta.bountiful.content.board
 
 import com.mojang.serialization.MapCodec
-import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.bounty.BountyInfo
+import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.item.BountyItem
@@ -22,6 +21,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.BlockSoundGroup
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
+import net.minecraft.util.ItemActionResult
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
@@ -93,37 +93,38 @@ class BoardBlock : BlockWithEntity(
         return createCodec { bfs -> BoardBlock() }
     }
 
-    override fun onUse(
+    override fun onUseWithItem(
+        stack: ItemStack?,
         state: BlockState?,
         world: World?,
         pos: BlockPos?,
-        player: PlayerEntity,
-        hand: Hand,
+        player: PlayerEntity?,
+        hand: Hand?,
         hit: BlockHitResult?
-    ): ActionResult {
+    ): ItemActionResult {
         (player as? ServerPlayerEntity)?.let {
             if (!it.isSneaking) {
                 val holding = it.getStackInHand(hand)
 
                 if (holding.item is BountyItem) {
                     //val data = BountyData[holding]
-                    val boardEntity = it.world.getBlockEntity(pos) as? BoardBlockEntity ?: return ActionResult.FAIL
+                    val boardEntity = it.world.getBlockEntity(pos) as? BoardBlockEntity ?: return ItemActionResult.FAIL
                     val success = (holding.item as BountyItem).tryCashIn(it, holding)
                     if (success) {
-                        boardEntity.updateUponBountyCompletion(it, holding[BountifulContent.BOUNTY_OBJS]!!, holding[BountifulContent.BOUNTY_INFO]!!)
+                        boardEntity.updateUponBountyCompletion(it, BountyStack(holding))
                         boardEntity.markDirty()
-                        return ActionResult.CONSUME
+                        return ItemActionResult.CONSUME
                     }
                 } else {
                     val screenHandlerFactory = state!!.createScreenHandlerFactory(world, pos)
                     if (screenHandlerFactory != null) {
                         it.openHandledScreen(screenHandlerFactory)
-                        return ActionResult.success(true)
+                        return ItemActionResult.success(true)
                     }
                 }
             }
         }
-        return ActionResult.success(true)
+        return ItemActionResult.success(true)
     }
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {

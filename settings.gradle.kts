@@ -35,7 +35,7 @@ dependencyResolutionManagement {
 
             val Kotlin = object {
                 val Version = "2.0.0" // => https://kotlinlang.org/docs/releases.html
-                val Serialization = "1.6.0" // => https://github.com/Kotlin/kotlinx.serialization/releases
+                val Serialization = "1.7.0" // => https://github.com/Kotlin/kotlinx.serialization/releases
                 val FabricAdapter = "1.11.0" // => https://modrinth.com/mod/fabric-language-kotlin/versions
                 val ForgeAdapter = "5.3.0" //=> https://modrinth.com/mod/kotlin-for-forge/versions
             }

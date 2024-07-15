@@ -1,11 +1,7 @@
 package io.ejekta.bountiful.bounty.types.builtin
 
-import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.components.BountyDataEntry
-import io.ejekta.bountiful.components.BountyStack
-import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.data.PoolEntry
 import io.ejekta.bountiful.util.iterateBountyStacks
 import io.ejekta.kambrik.ext.identifier
@@ -30,8 +26,8 @@ class BountyTypeEntity : IBountyObjective {
         return id == Identifier.of(entry.content)
     }
 
-    override fun textSummary(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity): MutableText {
-        val progress = getProgress(entry, player)
+    override fun textOnBounty(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity, current: Int): MutableText {
+        val progress = getProgress(entry, player, current)
         return when (isObj) {
             true -> Text.literal("Kill ").append(
                 getEntityType(entry).name.copy()
@@ -42,7 +38,7 @@ class BountyTypeEntity : IBountyObjective {
         }
     }
 
-    override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
+    override fun textOnBoardSidebar(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
         return listOf(getEntityType(entry).name)
     }
 

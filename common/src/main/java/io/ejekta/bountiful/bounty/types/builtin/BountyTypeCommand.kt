@@ -20,11 +20,11 @@ class BountyTypeCommand : IBountyReward {
         return parsed.exceptions.isEmpty()
     }
 
-    override fun textSummary(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity): MutableText {
+    override fun textOnBounty(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity, current: Int): MutableText {
         return getDescription(entry)
     }
 
-    override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
+    override fun textOnBoardSidebar(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
         return listOf(getDescription(entry))
     }
 

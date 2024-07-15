@@ -1,6 +1,5 @@
 package io.ejekta.bountiful.components
 
-import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.content.BountifulContent

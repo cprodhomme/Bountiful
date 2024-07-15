@@ -8,10 +8,7 @@ import io.ejekta.bountiful.data.Decree
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
-import net.minecraft.component.DataComponentTypes
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
@@ -54,16 +51,16 @@ data class BountyDataEntry(
         return "BDE[type=$logic, content=$content, amount=$amount, isNbtNull=${nbt == null}, name=$name, mystery=$isMystery]"
     }
 
-    fun textBoard(player: PlayerEntity): List<Text> {
-        return logic.textBoard(this, player)
+    fun textOnBoardSidebar(player: PlayerEntity): List<Text> {
+        return logic.textOnBoardSidebar(this, player)
     }
 
-    fun textSummary(player: PlayerEntity, isObj: Boolean): MutableText {
+    fun textOnBounty(player: PlayerEntity, isObj: Boolean, current: Int): MutableText {
         return when (isMystery) {
             true -> Text.literal("???").formatted(Formatting.BOLD).append(
                 Text.literal("x$amount").formatted(Formatting.WHITE)
             )
-            false -> logic.textSummary(this, isObj, player)
+            false -> logic.textOnBounty(this, isObj, player, current)
         }
     }
 

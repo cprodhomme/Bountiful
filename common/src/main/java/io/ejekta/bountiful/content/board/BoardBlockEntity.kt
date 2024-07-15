@@ -1,11 +1,8 @@
 package io.ejekta.bountiful.content.board
 
 import io.ejekta.bountiful.Bountiful
-import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.components.DecreeData
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItem
-import io.ejekta.bountiful.components.BountyEntries
-import io.ejekta.bountiful.components.BountyInfo
+import io.ejekta.bountiful.components.*
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.content.BountifulContent
@@ -158,7 +155,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         }
     }
 
-    fun updateUponBountyCompletion(player: ServerPlayerEntity, objectives: BountyEntries, bountyInfo: BountyInfo) {
+    fun updateUponBountyCompletion(player: ServerPlayerEntity, holding: BountyStack) {
         // Award advancement to player
         BountifulContent.Triggers.BOUNTY_COMPLETED.trigger(player)
 
@@ -174,11 +171,11 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         }
 
         player.serverWorld.let {
-            if (bountyInfo.timeTakenSecs(it) <= 60) {
+            if (holding.info.timeTakenSecs(it) <= 60) {
                 BountifulContent.Triggers.RUSH_ORDER.trigger(player)
 
             }
-            if (bountyInfo.timeLeftSecs(it) <= 10) {
+            if (holding.info.timeLeftSecs(it) <= 10) {
                 BountifulContent.Triggers.PROCRASTINATOR.trigger(player)
             }
             player.incrementStat(BountifulContent.CustomStats.BOUNTIES_COMPLETED)
@@ -187,9 +184,9 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         // Tick completion upwards
         incrementCompletedBounties(player)
         // Fill pickups
-        villagerPickupPopulate(objectives)
+        villagerPickupPopulate(holding.objs)
         // Have a villager check on the board
-        getBestVillager(objectives)?.checkOnBoard(pos)
+        getBestVillager(holding.objs)?.checkOnBoard(pos)
     }
 
     private fun addBountyToRandomSlot(stack: ItemStack) {
@@ -429,8 +426,8 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
 
     // Villager & Completion Logic
 
-    private fun villagerPickupPopulate(objectives: BountyEntries) {
-        val stackMap = objectives.entries.filter { it.logic is BountyTypeItem }.map {
+    private fun villagerPickupPopulate(objectives: List<BountyDataEntry>) {
+        val stackMap = objectives.filter { it.logic is BountyTypeItem }.map {
             BountyTypeItem.getItemStack(it) to it.getRelatedProfessions()
         }
         for ((stack, profs) in stackMap) {
@@ -499,7 +496,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         return false
     }
 
-    private fun getBestVillager(objectives: BountyEntries): VillagerEntity? {
+    private fun getBestVillager(objectives: List<BountyDataEntry>): VillagerEntity? {
         val nearestVillagers = findNearestVillagers(64)
         if (nearestVillagers.isEmpty()) {
             return null
@@ -507,7 +504,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
 
         val villagerProfessions = nearestVillagers.map { it.villagerData.profession.id }.toSet()
 
-        val matchingProfs = objectives.entries.filter {
+        val matchingProfs = objectives.filter {
             it.getRelatedProfessions().intersect(villagerProfessions).isNotEmpty()
         }
 

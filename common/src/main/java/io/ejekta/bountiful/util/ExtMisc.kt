@@ -1,6 +1,5 @@
 package io.ejekta.bountiful.util
 
-import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.board.BoardBlockEntity
@@ -141,12 +140,6 @@ fun ServerPlayerEntity.iterateBountyStacks(func: BountyStack.() -> Unit) {
     inventory.main.filter {
         it.item is BountyItem
     }.map { BountyStack(it) }.forEach(func)
-}
-
-fun ServerPlayerEntity.iterateBountyData(func: BountyData.() -> Boolean) {
-    iterateBountyStacks {
-        BountyData.editIf(this, func)
-    }
 }
 
 fun Brain<*>.ensureMemoryModules(memoryList: List<MemoryModuleType<*>>) {

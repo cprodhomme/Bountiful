@@ -4,20 +4,18 @@ import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.data.PoolEntry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer
-import net.minecraft.server.world.ServerWorld
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
 
 interface IBountyType {
 
     val id: Identifier
 
-    fun textSummary(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity): MutableText
+    fun textOnBounty(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity, current: Int): MutableText
 
-    fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text>
+    fun textOnBoardSidebar(entry: BountyDataEntry, player: PlayerEntity): List<Text>
 
     fun isValid(entry: PoolEntry, server: MinecraftServer): Boolean
 

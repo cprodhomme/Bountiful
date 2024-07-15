@@ -1,10 +1,10 @@
 package io.ejekta.bountiful.data
 
 import io.ejekta.bountiful.Bountiful
-import io.ejekta.bountiful.bounty.BountyDataEntry
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.bounty.types.IBountyType
+import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.util.getTagItemKey
@@ -117,6 +117,7 @@ class PoolEntry private constructor() {
             type,
             actualContent,
             amt,
+            totWorth.toInt(),
             nbt,
             name,
             icon,
@@ -124,8 +125,9 @@ class PoolEntry private constructor() {
             rarity = rarity,
             critConditions = conditions
         ).apply {
-            logic.setup(this, world, pos)
-            relatedDecreeIds = usedDecs ?: emptySet()
+            //logic.setup(this, world, pos)
+            // TODO set related decree ids
+            //relatedDecreeIds = usedDecs ?: emptySet()
         }
     }
 

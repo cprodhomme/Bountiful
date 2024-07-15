@@ -115,11 +115,7 @@ interface BountifulSharedApi {
             if (criterion !is TickCriterion && criterion !is EnterBlockCriterion) {
                 player.iterateBountyStacks {
 
-                    val objEntries = this[BountifulContent.BOUNTY_OBJS] ?: return@iterateBountyStacks
-                    val objectives = objEntries.entries
-
-                    val triggerObjs = objectives.filter { it.critConditions != null }.takeIf { it.isNotEmpty() }
-                        ?: emptyList()
+                    val triggerObjs = objs.filter { it.critConditions != null }.takeIf { it.isNotEmpty() } ?: emptyList()
 
                     for (obj in triggerObjs) {
 
@@ -135,15 +131,13 @@ interface BountifulSharedApi {
                         )
 
                         if (result) {
-                            obj.advanceIn(this)
+                            advance(obj)
                             UpdateCriteriaObjective(
-                                player.inventory.indexOf(this),
-                                objectives.indexOf(obj)
-                            ).sendToClient(player)
+                                player.inventory.indexOf(stack), obj.id).sendToClient(player)
                         }
                     }
 
-                    objEntries.checkForCompletionAndAlert(player, this)
+                    checkForCompletionAndAlert(player)
                 }
             }
         }

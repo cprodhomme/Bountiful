@@ -47,8 +47,8 @@ class BountyTypeItem : IBountyExchangeable {
         }
     }
 
-    override fun textSummary(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity): MutableText {
-        val progress = getProgress(entry, player)
+    override fun textOnBounty(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity, current: Int): MutableText {
+        val progress = getProgress(entry, player, current)
         val itemName = getItemName(entry)
         return when (isObj) {
             true -> itemName.formatted(progress.color).append(progress.neededText.colored(Formatting.WHITE))
@@ -56,7 +56,7 @@ class BountyTypeItem : IBountyExchangeable {
         }
     }
 
-    override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
+    override fun textOnBoardSidebar(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
         return getItemStack(entry).getTooltip(Item.TooltipContext.DEFAULT, player, TooltipType.BASIC)
     }
 

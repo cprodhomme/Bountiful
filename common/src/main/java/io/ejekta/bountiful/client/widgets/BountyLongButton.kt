@@ -1,7 +1,6 @@
 package io.ejekta.bountiful.client.widgets
 
 import io.ejekta.bountiful.Bountiful
-import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeEntity
 import io.ejekta.bountiful.bounty.types.builtin.BountyTypeItem
@@ -105,7 +104,7 @@ class BountyLongButton(val parent: BoardScreen, var bountyIndex: Int) : KWidget 
         // Entry tooltip
         dsl {
             onHover(x, y, 18, 18) {
-                tooltip(entry.textBoard(MinecraftClient.getInstance().player!!))
+                tooltip(entry.textOnBoardSidebar(MinecraftClient.getInstance().player!!))
             }
         }
     }

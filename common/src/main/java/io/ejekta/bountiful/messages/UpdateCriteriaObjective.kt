@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 import net.minecraft.network.packet.CustomPayload
 
 @Serializable
-class UpdateCriteriaObjective(val slot: Int, val objIndex: Int) : KambrikMsg() {
+class UpdateCriteriaObjective(val slot: Int, val objId: String) : KambrikMsg() {
     override fun onClientReceived() {
         println("Client received update bounty tooltip update with slot number: $slot")
         val player = ctx.player

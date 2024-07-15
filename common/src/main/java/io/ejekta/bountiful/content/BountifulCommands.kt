@@ -4,10 +4,10 @@ import com.example.recipe.RecursiveRecipeParser
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import io.ejekta.bountiful.Bountiful
-import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.BountyTypeRegistry
 import io.ejekta.bountiful.chaos.ChaosMode
+import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.config.JsonFormats
 import io.ejekta.bountiful.content.gui.AnalyzerScreenHandler
@@ -330,7 +330,6 @@ object BountifulCommands {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
         1
     }
 
@@ -417,10 +416,9 @@ object BountifulCommands {
     }
 
     private fun complete() = PlayerCommand {
-        val held = it.mainHandStack
-        val data = BountyData[held]
+        val data = BountyStack(it.mainHandStack)
         try {
-            data.tryCashIn(it, held)
+            data.tryCashIn(it)
         } catch (e: Exception) {
             e.printStackTrace()
         }

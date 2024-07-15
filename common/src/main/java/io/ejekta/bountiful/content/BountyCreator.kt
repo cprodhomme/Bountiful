@@ -1,7 +1,6 @@
 package io.ejekta.bountiful.content
 
 import io.ejekta.bountiful.Bountiful
-import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.bounty.types.IBountyReward
@@ -30,8 +29,6 @@ class BountyCreator private constructor(
     // Handle matching algorithm direction
     private val rewardsFirst = !BountifulIO.configData.bounty.reverseMatchingAlgorithm
 
-    private var data = BountyData()
-    //private var info = BountyInfo.DEFAULT
 
     internal val objectives = mutableListOf<BountyDataEntry>()
     internal val rewards = mutableListOf<BountyDataEntry>()

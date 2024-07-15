@@ -20,13 +20,13 @@ class BountyTypeCriteria : IBountyObjective {
         return true // TODO can we validate Criteria?
     }
 
-    override fun textSummary(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity): MutableText {
-        val progress = getProgress(entry, player)
+    override fun textOnBounty(entry: BountyDataEntry, isObj: Boolean, player: PlayerEntity, current: Int): MutableText {
+        val progress = getProgress(entry, player, current)
         val textSum = if (entry.name != null) Text.literal(entry.name) else entry.translation
         return textSum.colored(progress.color).append(progress.neededText.colored(Formatting.WHITE))
     }
 
-    override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
+    override fun textOnBoardSidebar(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
         return listOf(
             if (entry.name != null) Text.literal(entry.name) else entry.translation
         )

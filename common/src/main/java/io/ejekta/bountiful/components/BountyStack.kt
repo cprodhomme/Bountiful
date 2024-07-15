@@ -132,11 +132,11 @@ class BountyStack(val stack: ItemStack) {
         return buildList {
             add(Text.translatable("bountiful.tooltip.required").formatted(Formatting.GOLD).append(":"))
             addAll(objs.map {
-                it.textSummary(player, true)
+                it.textOnBounty(player, true, progressOf(it))
             })
             add(Text.translatable("bountiful.tooltip.rewards").formatted(Formatting.GOLD).append(":"))
             addAll(rews.map {
-                it.textSummary(player, false)
+                it.textOnBounty(player, false, progressOf(it))
             })
 
             if (type == TooltipType.ADVANCED && BountifulIO.configData.client.advancedDebugTooltips) {
