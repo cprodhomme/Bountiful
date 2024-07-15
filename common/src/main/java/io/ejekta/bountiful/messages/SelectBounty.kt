@@ -2,7 +2,6 @@ package io.ejekta.bountiful.messages
 
 import io.ejekta.bountiful.content.gui.BoardScreenHandler
 import io.ejekta.kambrik.message.KambrikMsg
-import io.ejekta.kambrik.message.ServerMsg
 import kotlinx.serialization.Serializable
 import net.minecraft.network.packet.CustomPayload
 

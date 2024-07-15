@@ -1,6 +1,8 @@
 package io.ejekta.bountiful.content.item
 
+import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.components.DecreeData
+import io.ejekta.bountiful.components.DecreeStack
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.decree.DecreeSpawnCondition
 import io.ejekta.bountiful.decree.DecreeSpawnRank
@@ -58,11 +60,9 @@ class DecreeItem : Item(
             ranked: Int = 1,
             spawnRank: DecreeSpawnRank = DecreeSpawnRank.CONSTANT
         ): ItemStack {
-            val dd = DecreeData(rank = ranked)
-            spawnRank.populateFunc(dd, decIds)
-            return ItemStack(BountifulContent.DECREE_ITEM).apply {
-                this[BountifulContent.DECREE_DATA] = dd
-            }
+            val stack = ItemStack(BountifulContent.DECREE_ITEM)
+            spawnRank.populateFunc(DecreeStack(stack).apply { rank = ranked }, decIds)
+            return stack
         }
     }
 

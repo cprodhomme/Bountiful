@@ -1,14 +1,11 @@
 package io.ejekta.bountiful.content.gui
 
-import io.ejekta.bountiful.bounty.BountyInfo
-import io.ejekta.bountiful.bridge.Bountybridge
+import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.board.BoardInventory
 import io.ejekta.bountiful.content.item.BountyItem
-import io.ejekta.bountiful.messages.ServerPlayerStatus
 import io.ejekta.bountiful.util.readOnlyCopy
-import io.ejekta.kambrik.bridge.Kambridge
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
@@ -25,7 +22,7 @@ class BoardBountySlot(private val inv: BoardInventory, val usingPlayer: PlayerEn
             // Mask all matching bounties
             val matchingMaskIndices = board.fullInventoryCopy().readOnlyCopy
                 .mapIndexed { indexI, itemStack ->
-                    if (ItemStack.canCombine(stack, itemStack)) {
+                    if (ItemStack.areItemsAndComponentsEqual(stack, itemStack)) {
                         indexI
                     } else {
                         null
@@ -42,7 +39,7 @@ class BoardBountySlot(private val inv: BoardInventory, val usingPlayer: PlayerEn
 
     override fun onTakeItem(player: PlayerEntity, stack: ItemStack) {
         if (stack.item is BountyItem) {
-            BountyInfo.setPickedUp(stack, player.world.time)
+            BountyStack(stack).setPickedUp(player.world.time)
         }
         if (usingPlayer is ServerPlayerEntity) {
             usingPlayer.incrementStat(BountifulContent.CustomStats.BOUNTIES_TAKEN)

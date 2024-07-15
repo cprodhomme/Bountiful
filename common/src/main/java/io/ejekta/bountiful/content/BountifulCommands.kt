@@ -318,7 +318,8 @@ object BountifulCommands {
 
         val newPoolEntry = PoolEntry.create().apply {
             content = held.identifier.toString()
-            nbt = if (it.mainHandStack == ItemStack.EMPTY) null else held.nbt
+            // TODO load components and such from pool entries correctly?
+            //nbt = if (it.mainHandStack == ItemStack.EMPTY) null else held.nbt
         }
 
         try {
@@ -389,7 +390,8 @@ object BountifulCommands {
 
             addToPool(it, inAmount, inUnitWorth, poolName) {
                 content = held.identifier.toString()
-                nbt = held.nbt
+                // TODO setting of nbt/components with hand command
+                //nbt = held.nbt
             }
             1
         }

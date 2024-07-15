@@ -19,7 +19,6 @@ import net.minecraft.loot.context.LootContextParameterSet
 import net.minecraft.loot.context.LootContextParameters
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.BlockSoundGroup
-import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.ItemActionResult
 import net.minecraft.util.hit.BlockHitResult
@@ -51,7 +50,8 @@ class BoardBlock : BlockWithEntity(
         val blockEntity = builder.get(LootContextParameters.BLOCK_ENTITY) ?: return mutableListOf()
         if (blockEntity.type == BountifulContent.BOARD_ENTITY) {
             return super.getDroppedStacks(state, builder).map {
-                it.also { blockEntity.setStackNbt(it) }
+                // TODO reimplement stack dropping for the board correctly
+                it//.also { blockEntity.setStackNbt(it) }
             }.toMutableList()
         }
         return mutableListOf()
@@ -68,9 +68,10 @@ class BoardBlock : BlockWithEntity(
         if (world != null && pos != null && itemStack != null && !world.isClient) {
             val blockEntity = world.getBlockEntity(pos, BountifulContent.BOARD_ENTITY)
             blockEntity.ifPresent {
-                val itemNbt = itemStack.nbt ?: return@ifPresent
-                it.readNbt(itemNbt)
-                it.markDirty()
+                // TODO reimplement board placing correctly
+//                val itemNbt = itemStack.nbt ?: return@ifPresent
+//                it.readNbt(itemNbt)
+//                it.markDirty()
             }
         }
     }

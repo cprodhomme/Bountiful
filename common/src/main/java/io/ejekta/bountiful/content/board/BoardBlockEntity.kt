@@ -138,7 +138,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
     }
 
     private fun getPlayersTrackingUs(): List<ServerPlayerEntity> {
-        return (world as? ServerWorld)?.chunkManager?.threadedAnvilChunkStorage?.getPlayersWatchingChunk(ChunkPos(pos)) ?: emptyList()
+        return (world as? ServerWorld)?.chunkManager?.chunkLoadingManager?.getPlayersWatchingChunk(ChunkPos(pos)) ?: emptyList()
     }
 
     private fun modifyTrackedGuiInvs(func: (inv: BoardInventory) -> Unit) {
@@ -159,7 +159,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         // Award advancement to player
         BountifulContent.Triggers.BOUNTY_COMPLETED.trigger(player)
 
-        player.increaseStat(BountifulContent.CustomStats.BOUNTY_COMPLETION_TIME, bountyInfo.timeTakenTicks(player.world).toInt())
+        player.increaseStat(BountifulContent.CustomStats.BOUNTY_COMPLETION_TIME, holding.info.timeTakenTicks(player.world).toInt())
 
         // Nightly message
         if (Bountiful.nightly) {
@@ -246,7 +246,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Bountiful
         }.forEach { stack ->
             // Get revealable decrees
             val revealable = BountifulContent.Decrees.filter(DecreeSpawnCondition.BOARD_REVEAL.spawnFunc).map { it.id }
-            DecreeData.edit(stack) {
+            DecreeData.editOn(stack) {
                 if (ids.isEmpty()) {
                     // Random populate
                     DecreeSpawnRank.RANDOM.populateFunc(this, revealable)

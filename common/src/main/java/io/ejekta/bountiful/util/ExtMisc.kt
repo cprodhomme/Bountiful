@@ -13,6 +13,7 @@ import net.minecraft.entity.passive.VillagerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.registry.Registries
@@ -26,6 +27,7 @@ import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.GlobalPos
 import net.minecraft.village.TradeOffer
+import net.minecraft.village.TradedItem
 import net.minecraft.world.World
 import java.util.*
 import kotlin.random.Random
@@ -173,9 +175,7 @@ fun VillagerEntity.checkOnBoard(boardPos: BlockPos) {
 
 fun VillagerEntity.hackyGiveTradeExperience(amt: Int) {
     trade(
-        TradeOffer(ItemStack.EMPTY, ItemStack.EMPTY, 1, amt, 1f).apply {
-            rewardingPlayerExperience = false
-        }
+        TradeOffer(TradedItem(Items.AIR), ItemStack.EMPTY, 1, amt, 1f)
     )
 }
 

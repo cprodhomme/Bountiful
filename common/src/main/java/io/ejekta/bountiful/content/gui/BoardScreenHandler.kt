@@ -2,7 +2,7 @@
 
 package io.ejekta.bountiful.content.gui
 
-import io.ejekta.bountiful.bounty.BountyInfo
+import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.board.BoardBlock
 import io.ejekta.bountiful.content.board.BoardInventory
@@ -61,7 +61,7 @@ class BoardScreenHandler @JvmOverloads constructor(
             val stack = getSlot(invSlot).stack
 
             if (stack.item is BountyItem) {
-                BountyInfo.setPickedUp(stack, player.world.time)
+                BountyStack(stack).setPickedUp(player.world.time)
             }
 
             when (invSlot) {

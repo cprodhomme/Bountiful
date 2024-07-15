@@ -54,6 +54,10 @@ class BountyStack(val stack: ItemStack) {
         }
     }
 
+    fun setPickedUp(time: Long) {
+        info = info.copy(timePickedUp = time)
+    }
+
     // Objectives
 
     private fun hasFinishedObjectives(player: PlayerEntity): Boolean {

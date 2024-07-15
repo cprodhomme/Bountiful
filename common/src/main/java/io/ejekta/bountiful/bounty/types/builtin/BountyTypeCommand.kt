@@ -33,7 +33,7 @@ class BountyTypeCommand : IBountyReward {
         val replacedCmd = entry.content
             .replace("%BOUNTY_AMOUNT%", entry.amount.toString())
             .replace("%PLAYER_NAME%", player.nameForScoreboard)
-            .replace("%PLAYER_NAME_RANDOM", server.playerNames.random())
+            .replace("%PLAYER_NAME_RANDOM%", server.playerNames.random())
             .replace("%PLAYER_POSITION%", "${player.pos.x} ${player.pos.y} ${player.pos.z}")
             // Should not NPE since capture group would fail first
             .replace(Regex("%RANDOM_INT\\((?<low>-*\\d+),\\s*(?<high>-*\\d+)\\)%")) {

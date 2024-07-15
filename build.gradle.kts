@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -70,8 +71,10 @@ subprojects {
             options.release.set(21)
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "21"
-            kotlinOptions.freeCompilerArgs = listOf("-Xlambdas=indy", "-Xjvm-default=all",)
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_21)
+                freeCompilerArgs.set(listOf("-Xlambdas=indy", "-Xjvm-default=all"))
+            }
         }
     }
 }
@@ -128,4 +131,7 @@ repositories {
 }
 kotlin {
     jvmToolchain(21)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }

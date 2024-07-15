@@ -3,7 +3,7 @@ package io.ejekta.bountiful.components
 import io.ejekta.bountiful.Bountiful
 import io.ejekta.bountiful.content.BountifulContent
 import kotlinx.serialization.Serializable
-import net.minecraft.component.ComponentType
+import net.minecraft.item.ItemStack
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.world.World
@@ -26,6 +26,16 @@ data class DecreeData(val ids: Set<String> = setOf(), val rank: Int = 1) {
             false -> {
                 listOf(Text.translatable("bountiful.decree.notset"))
             }
+        }
+    }
+
+
+
+    companion object {
+        val EMPTY = DecreeData()
+
+        fun editOn(stack: ItemStack, func: DecreeStack.() -> Unit) {
+            DecreeStack(stack).func()
         }
     }
 }
