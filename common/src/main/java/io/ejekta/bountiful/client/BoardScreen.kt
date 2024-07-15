@@ -37,7 +37,9 @@ class BoardScreen(handler: ScreenHandler, inventory: PlayerInventory, title: Tex
     private val buttons = (0 until 21).map { BountyLongButton(this, it) }
 
     private val validButtons: List<BountyLongButton>
-        get() = buttons.filter { it.getStack()[BountifulContent.BOUNTY_OBJS]!!.entries.isNotEmpty() }
+        get() = buttons.filter {
+            (it.getStack()[BountifulContent.BOUNTY_OBJS]?.entries ?: emptyList()).isNotEmpty()
+        }
 
     private val scroller = KScrollbarVertical(140, 6, 27, SCROLLER, 0x0)
 
