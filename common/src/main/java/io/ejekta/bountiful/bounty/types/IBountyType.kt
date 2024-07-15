@@ -21,10 +21,6 @@ interface IBountyType {
 
     fun isValid(entry: PoolEntry, server: MinecraftServer): Boolean
 
-    fun setup(entry: BountyDataEntry, world: ServerWorld, pos: BlockPos) {
-        // Default no-op
-    }
-
     fun getDescription(entry: BountyDataEntry): MutableText {
         return entry.name?.let {
             Text.literal(it)
@@ -46,7 +42,6 @@ interface IBountyType {
     fun Text.colored(formatting: Formatting): MutableText {
         return copy().formatted(formatting)
     }
-
 
     val Pair<Int, Int>.needed
         get() = Text.literal(" ($first/$second)")

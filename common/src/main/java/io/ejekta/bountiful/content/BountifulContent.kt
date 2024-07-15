@@ -12,6 +12,7 @@ import io.ejekta.bountiful.content.item.DecreeItem
 import io.ejekta.bountiful.data.Decree
 import io.ejekta.bountiful.data.Pool
 import io.ejekta.kambrik.registration.KambrikAutoRegistrar
+import net.minecraft.component.DataComponentTypes
 import net.minecraft.entity.ai.brain.MemoryModuleType
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item

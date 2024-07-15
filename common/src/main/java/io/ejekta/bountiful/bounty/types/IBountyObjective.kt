@@ -8,12 +8,11 @@ interface IBountyObjective : IBountyType {
         return Progress(current, entry.amount)
     }
 
-    fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
+    fun consumeObjectives(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
         return current >= entry.amount
     }
 
     fun getNewCurrent(entry: BountyDataEntry, player: PlayerEntity, current: Int): Int {
         return current
     }
-
 }

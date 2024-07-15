@@ -68,7 +68,7 @@ class BountyTypeItem : IBountyExchangeable {
         return getCurrentStacks(entry, player).values.sum()
     }
 
-    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
+    override fun consumeObjectives(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
         val currStacks = getCurrentStacks(entry, player)
         if (currStacks.values.sum() >= entry.amount) {
             currStacks.forEach { (stack, toShrink) ->

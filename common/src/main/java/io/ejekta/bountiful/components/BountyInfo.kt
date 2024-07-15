@@ -3,10 +3,12 @@ package io.ejekta.bountiful.components
 import io.ejekta.bountiful.bounty.BountyData
 import io.ejekta.bountiful.bounty.BountyRarity
 import io.ejekta.bountiful.config.BountifulIO
+import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.util.GameTime
 import kotlinx.serialization.Serializable
 import net.minecraft.client.MinecraftClient
 import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
 import net.minecraft.item.tooltip.TooltipType
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
@@ -45,30 +47,6 @@ data class BountyInfo(
 
     fun formattedTimeLeft(world: World): Text {
         return GameTime.formatTimeExpirable(timeLeftSecs(world))
-    }
-
-    fun genTooltip(fromData: BountyData, isServer: Boolean, context: Item.TooltipContext, type: TooltipType): List<MutableText> {
-        if (isServer) {
-            return emptyList()
-        }
-        val player = MinecraftClient.getInstance().player!!
-        return buildList {
-            add(Text.translatable("bountiful.tooltip.required").formatted(Formatting.GOLD).append(":"))
-            addAll(fromData.objectives.map {
-                it.textSummary(player, true)
-            })
-            add(Text.translatable("bountiful.tooltip.rewards").formatted(Formatting.GOLD).append(":"))
-            addAll(fromData.rewards.map {
-                it.textSummary(player, false)
-            })
-
-            // TODO reimplement advanced tooltip contexts
-            if (type == TooltipType.ADVANCED && BountifulIO.configData.client.advancedDebugTooltips) {
-                add(Text.literal(""))
-                add(Text.literal("Bountiful Debug Info:").formatted(Formatting.GOLD))
-                add(Text.literal("Taken: ${timeTakenSecs(player.world)}, Left: ${timeLeftSecs(player.world)}"))
-            }
-        }
     }
 
     companion object {

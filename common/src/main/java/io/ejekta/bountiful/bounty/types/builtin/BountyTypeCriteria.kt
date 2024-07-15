@@ -16,7 +16,6 @@ class BountyTypeCriteria : IBountyObjective {
 
     override val id: Identifier = Identifier.of("criteria")
 
-
     override fun isValid(entry: PoolEntry, server: MinecraftServer): Boolean {
         return true // TODO can we validate Criteria?
     }
@@ -37,7 +36,7 @@ class BountyTypeCriteria : IBountyObjective {
         return Progress(current, entry.amount)
     }
 
-    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
+    override fun consumeObjectives(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
         return current >= entry.amount
     }
 

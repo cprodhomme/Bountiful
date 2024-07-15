@@ -1,6 +1,7 @@
 package io.ejekta.bountiful.bounty.types.builtin
 
 import io.ejekta.bountiful.bounty.types.IBountyExchangeable
+import io.ejekta.bountiful.bounty.types.IBountyObjective
 import io.ejekta.bountiful.bounty.types.Progress
 import io.ejekta.bountiful.components.BountyDataEntry
 import io.ejekta.bountiful.data.PoolEntry
@@ -20,7 +21,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.world.World
 
 
-class BountyTypeItemTag : IBountyExchangeable {
+class BountyTypeItemTag : IBountyObjective {
 
     override val id: Identifier = Identifier.of("item_tag")
 
@@ -50,7 +51,7 @@ class BountyTypeItemTag : IBountyExchangeable {
     override fun textBoard(entry: BountyDataEntry, player: PlayerEntity): List<Text> {
         return listOf(
             if (entry.name != null) {
-                Text.literal(entry.name!!)
+                Text.literal(entry.name)
             } else {
                 entry.translation
             },
@@ -66,17 +67,13 @@ class BountyTypeItemTag : IBountyExchangeable {
         return getCurrentStacks(entry, player)?.values?.sum() ?: 0
     }
 
-    override fun tryFinishObjective(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
+    override fun consumeObjectives(entry: BountyDataEntry, player: PlayerEntity, current: Int): Boolean {
         return getCurrentStacks(entry, player)?.let {
             it.forEach { (stack, toShrink) ->
                 stack.decrement(toShrink)
             }
             true
         } ?: false
-    }
-
-    override fun giveReward(entry: BountyDataEntry, player: PlayerEntity) {
-        // NO-OP
     }
 
     companion object {

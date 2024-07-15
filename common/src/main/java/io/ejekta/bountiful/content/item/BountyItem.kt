@@ -1,8 +1,7 @@
 package io.ejekta.bountiful.content.item
 
-import io.ejekta.bountiful.bounty.BountyData
-import io.ejekta.bountiful.bounty.BountyInfo
 import io.ejekta.bountiful.bounty.BountyRarity
+import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.kambrik.bridge.Kambridge
@@ -22,8 +21,10 @@ class BountyItem : Item(
 ) {
 
     override fun getName(stack: ItemStack): Text {
-        // TODO this may be sided
-        val info = stack[BountifulContent.BOUNTY_INFO] ?: return Text.literal("ERR? No Info")
+        if (Kambridge.isOnServer()) {
+            return Text.translatable("bountiful.bounty")
+        }
+        val info = BountyStack(stack).info
         var text = Text.translatable(info.rarity.name.lowercase()
             // Capitalizing
             .replaceFirstChar {
@@ -44,28 +45,11 @@ class BountyItem : Item(
     }
 
     fun tryCashIn(player: PlayerEntity, stack: ItemStack): Boolean {
-
-        if (stack[BountifulContent.BOUNTY_INFO]!!.timeLeftTicks(player.world) <= 0) {
-            player.sendMessage(Text.translatable("bountiful.bounty.expired"))
-            return false
-        }
-
-        val objs = stack[BountifulContent.BOUNTY_OBJS]
-        val comp = stack[BountifulContent.BOUNTY_COMPLETION]?.amounts ?: emptyMap()
-        return if (objs?.hasFinishedAll(player, comp) == true) {
-            objs.tryFinish(player, stack[BountifulContent.BOUNTY_COMPLETION]?.amounts ?: emptyMap())
-            stack[BountifulContent.BOUNTY_REWS]!!.rewardPlayer(player)
-            stack.decrement(stack.maxCount)
-            true
-        } else {
-            player.sendMessage(Text.translatable("bountiful.tooltip.requirements"), false)
-            false
-        }
+        return BountyStack(stack).tryCashIn(player)
     }
 
-    // TODO genTooltip should probably be moved to this class since it contains both entry lists
     override fun appendTooltip(
-        stack: ItemStack?,
+        stack: ItemStack,
         context: TooltipContext,
         tooltip: MutableList<Text>?,
         type: TooltipType
@@ -73,10 +57,8 @@ class BountyItem : Item(
         if (Kambridge.isOnServer()) {
             return
         }
-        if (stack != null) {
-            val data = stack[BountifulContent.BOUNTY_INFO]?.genTooltip(BountyData[stack], Kambridge.isOnServer(), context, type)
-            tooltip?.addAll(data ?: emptySet())
-        }
+        val tips = BountyStack(stack).genTooltip(Kambridge.isOnServer(), type)
+        tooltip?.addAll(tips)
         super.appendTooltip(stack, context, tooltip, type)
     }
 

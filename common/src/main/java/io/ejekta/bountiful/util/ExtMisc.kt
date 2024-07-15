@@ -1,6 +1,7 @@
 package io.ejekta.bountiful.util
 
 import io.ejekta.bountiful.bounty.BountyData
+import io.ejekta.bountiful.components.BountyStack
 import io.ejekta.bountiful.content.BountifulContent
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.gui.BoardScreenHandler
@@ -136,10 +137,10 @@ fun <T> getRegistryTags(reg: DynamicRegistryManager, tagKey: TagKey<T>): List<T>
 val KambrikMsg.ctx: MinecraftClient
     get() = MinecraftClient.getInstance()
 
-fun ServerPlayerEntity.iterateBountyStacks(func: ItemStack.() -> Unit) {
+fun ServerPlayerEntity.iterateBountyStacks(func: BountyStack.() -> Unit) {
     inventory.main.filter {
         it.item is BountyItem
-    }.forEach(func)
+    }.map { BountyStack(it) }.forEach(func)
 }
 
 fun ServerPlayerEntity.iterateBountyData(func: BountyData.() -> Boolean) {
